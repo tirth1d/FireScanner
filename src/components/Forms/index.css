@@ -1,0 +1,293 @@
+.StuSignupForm,
+.FacSignupForm {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /*Above all properties are used to make text non-selectable*/
+}
+
+form {
+  position: relative;
+  margin-top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 20px;
+  background-color: white;
+  display: inline-block;
+  padding: 40px 36px;
+  padding-top: 30px;
+  border: 2px solid #f0f0f0;
+  text-align: center;
+}
+
+input,
+.dropdown-group {
+  border: 1px solid #e1e1e1;
+  border-radius: 5px;
+  padding: 10px;
+  width: 350px;
+  font-size: 16px;
+}
+
+.dropdown-group {
+  padding: 4px 10px;
+}
+
+.group {
+  margin: 10px 14px;
+  margin-top: 0;
+  display: inline-block;
+  position: relative;
+}
+
+.placeholder,
+.dropdown-placeholder {
+  cursor: auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #8d8d8d;
+  transition: all 200ms ease-in-out;
+  text-align: center;
+}
+
+input:focus + .placeholder {
+  background-color: #ffffff;
+  padding-left: 6px;
+  padding-right: 6px;
+  top: -5%;
+}
+.above {
+  top: -5%;
+  background-color: #ffffff;
+  padding-left: 6px;
+  padding-right: 6px;
+  top: -5%;
+}
+.dropdown-group {
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+}
+
+.dropdown-group:hover > .dropdown-placeholder {
+  left: 24%;
+}
+
+.Dropdown {
+  position: relative;
+  margin-left: 50%;
+  width: 120px;
+  padding: 4.5px 10px;
+  cursor: pointer;
+  visibility: hidden;
+  border: 2px solid #e1e1e1;
+  border-radius: 5px;
+}
+
+.dropdown-group:hover > .Dropdown {
+  visibility: visible;
+}
+
+.SubmitBut {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  border: none;
+  padding: 8px 30px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
+  word-spacing: 1px;
+  font-weight: 500;
+  border: 2px solid #ff0000;
+  background-color: #ff0000;
+  transform-origin: center;
+  transition: all 250ms ease-in-out;
+}
+
+.SubmitBut:hover {
+  background-color: #fff;
+  border: 2px solid #ff0000;
+  color: #000;
+}
+
+.flex-grp {
+  display: flex;
+}
+
+.flex-fila-grp {
+  display: flex;
+  justify-content: center;
+}
+
+.group-checkbox {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.group-checkbox div:first-child {
+  margin-right: 8px;
+  cursor: pointer;
+  height: 10px;
+  width: 10px;
+  border-radius: 2px;
+}
+.checkbox-div-inactive {
+  border: 1px solid #8d8d8d;
+  background-color: transparent;
+}
+.checkbox-div-active {
+  border: 1px solid #0000ff;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0000ff;
+}
+.checkbox-div-inactive :first-child {
+  display: none;
+}
+
+.checkbox-div-active :first-child {
+  height: 80%;
+  width: 80%;
+  color: #ffffff;
+  display: block;
+}
+.group-checkbox label {
+  font-size: 12px;
+  color: #8d8d8d;
+}
+
+.group-checkbox label span {
+  cursor: pointer;
+  color: #0078ff;
+}
+
+.fi-name input,
+.la-name input {
+  padding-left: 20px;
+  width: 200px;
+}
+
+.fi-name input {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+}
+
+.la-name input {
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.LoginRedirect {
+  text-align: center;
+  margin-top: 55px;
+  font-size: 14px;
+  color: #8d8d8d;
+}
+
+.LoginRedirect a {
+  text-decoration: none;
+  color: #1778f2;
+  margin-left: 8px;
+}
+
+@media screen and (max-width: 950px) {
+  form {
+    width: 400px;
+    padding-top: 15px;
+    padding-bottom: 30px;
+  }
+  .flex-grp {
+    display: unset;
+  }
+
+  .fi-name input,
+  .la-name input {
+    padding-left: 10px;
+    width: 350px;
+  }
+
+  .fi-name input {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .la-name input {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+  .group {
+    margin-top: 15px;
+  }
+
+  .group-checkbox {
+    margin-top: 16px;
+    margin-bottom: 12px;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  form {
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 70vw;
+    padding-top: 15px;
+    padding-bottom: 30px;
+  }
+  input,
+  .dropdown-group {
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    padding: 10px;
+    width: 68vw;
+    font-size: 14px;
+  }
+
+  .fi-name input,
+  .la-name input {
+    padding-left: 10px;
+    width: 68vw;
+  }
+
+  .Dropdown {
+    width: 80px;
+    padding: 0px 10px;
+    border: 1px solid #e1e1e1;
+  }
+  .SubmitBut {
+    font-size: 14px;
+  }
+  /*Last two class's values are very important to understand theproblem with web-first and mobile-last approach*/
+  br {
+    display: none;
+  }
+  .group {
+    margin: 12px 14px;
+  }
+
+  .group-checkbox {
+    margin-top: 10px;
+    margin-bottom: 8px;
+  }
+}

@@ -1,0 +1,39 @@
+.Choice {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  height: 100vh;
+  margin-top: -5vh;
+}
+
+.ChoiceHeader {
+  margin: 30px;
+  font-size: 30px;
+  word-spacing: 2px;
+  font-weight: bolder;
+}
+
+.ChoiceCards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ChoiceCardOneDiv {
+  margin-right: 35px;
+}
+
+@media screen and (max-width: 450px) {
+  .ChoiceHeader {
+    display: none;
+  }
+  .ChoiceCards {
+    flex-direction: column;
+  }
+
+  .ChoiceCardOneDiv {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+}
