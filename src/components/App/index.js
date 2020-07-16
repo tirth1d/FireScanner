@@ -11,6 +11,19 @@ import HomePage from "../Home";
 import Destination from "../DestinationPage";
 import { withAuthentication } from "../Session";
 
+/*Font Awesome Library*/
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faArrowRight,
+  faMinus,
+  faPlus,
+  faPencilAlt,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import ProfilePage from "../Forms/Profile";
+import Classroom from "../classroom";
+library.add(faArrowRight, faMinus, faPlus, faPencilAlt, faTrashAlt);
+
 const App = () => (
   <Router>
     <div className="App">
@@ -23,6 +36,8 @@ const App = () => (
         <Route path={ROUTES.FAC_SIGN_UP} component={SignUpFac} />
         <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForget} />
         <Route path={ROUTES.PASSWORD_UPDATE} component={PasswordUpdate} />
+        <Route path={ROUTES.PROFILE} component={ProfilePage} />
+        <Route path={ROUTES.CLASSROOM} component={Classroom} />
       </Switch>
     </div>
   </Router>

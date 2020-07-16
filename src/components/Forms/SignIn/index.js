@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import Banner from "../FormBanner";
 import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
+import AuthUserContext from "../../Session/context";
+import Home from "../../Home";
+
 import "../index.css";
 
 import StuLoginBanner from "../../../images/loginbanner.png";
@@ -9,8 +12,16 @@ import StuLoginBanner from "../../../images/loginbanner.png";
 import { withFirebase } from "../../Configuration";
 import * as ROUTES from "../../../constants/routes";
 
+const condition = (authUser) => !!authUser;
+
+const LoginPageCondition = () => (
+  <AuthUserContext.Consumer>
+    {(authUser) => (condition(authUser) ? <Home /> : <SignInPage />)}
+  </AuthUserContext.Consumer>
+);
+
 const SignInPage = () => (
-  <div>
+  <div style={{ backgroundColor: `#FCFCFC` }}>
     <Banner
       banner={StuLoginBanner}
       alt="FcaulLoginBanner"
@@ -142,6 +153,6 @@ const PasswordForgetLink = () => (
 
 const SignInForm = compose(withRouter, withFirebase)(SignInFormBase);
 
-export default SignInPage;
+export default LoginPageCondition;
 
 export { SignInForm };

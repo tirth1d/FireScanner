@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
+
+import AuthUserContext from "../../../Session/context";
+import Home from "../../../Home";
+import TermsCheckbox from "../TermsCheckbox";
+
 import { withFirebase } from "../../../Configuration";
+import CollegeJSON from "../../../../CollegeList.json";
 
 import * as ROUTES from "../../../../constants/routes";
 import * as ROLE from "../../../../constants/role";
@@ -10,8 +16,16 @@ import Banner from "../../FormBanner";
 import FacSignUpBanner from "../../../../images/faculty_banner.png";
 import "../../index.css";
 
+const condition = (authUser) => !!authUser;
+
+const SignUpFacultyPageCondition = () => (
+  <AuthUserContext.Consumer>
+    {(authUser) => (condition(authUser) ? <Home /> : <SignUpFacPage />)}
+  </AuthUserContext.Consumer>
+);
+
 const SignUpFacPage = () => (
-  <div>
+  <div style={{ backgroundColor: `#FCFCFC` }}>
     <Banner
       banner={FacSignUpBanner}
       alt="FcaulLoginBanner"
@@ -27,11 +41,13 @@ const INITIAL_STATE = {
   fname: "",
   lname: "",
   email: "",
+  college: "",
   accesscode: "",
   passwordOne: "",
   passwordTwo: "",
   error: null,
-  isFaculty: true,
+  role: ROLE.FACULTY,
+  college_list: CollegeJSON,
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -57,18 +73,19 @@ class SignUpFormBase extends Component {
       fname,
       lname,
       email,
+      college,
       accesscode,
       passwordOne,
       passwordTwo,
-      isFaculty,
+      role,
     } = this.state;
 
-    const role = {};
+    // let role = "";
 
-    if (isFaculty) {
-      //Usually we don't need isFaculty condition as it is always gonna be true bu i'm keeping it fot better understanding purposes.
-      role[ROLE.FACULTY] = ROLE.FACULTY;
-    }
+    // if (isFaculty) {
+    //   //Usually we don't need isFaculty condition as it is always gonna be true bu i'm keeping it fot better understanding purposes.
+    //   role = ROLE.FACULTY;
+    // }
 
     this.setState({ error: null });
 
@@ -77,13 +94,16 @@ class SignUpFormBase extends Component {
       passwordTwo === "" &&
       fname === "" &&
       (lname === "") & (email === "") &&
-      accesscode === ""
+      accesscode === "" &&
+      college === ""
     ) {
       this.setState({ error: "Please Fill Everything Up Properly" });
     } else if (fname === "" || lname === "") {
       this.setState({ error: "Please Enter Your First & Last Name Properly" });
     } else if (email === "") {
       this.setState({ error: "Please Enter Your Email Address" });
+    } else if (college === "") {
+      this.setState({ error: "Please Choose Your College" });
     } else if (accesscode === "") {
       this.setState({ error: "Please Enter Access Code" });
     } else if (passwordOne !== passwordTwo) {
@@ -95,18 +115,26 @@ class SignUpFormBase extends Component {
         .doCreateUserWithEmailAndPassword(email, passwordOne)
         .then((authUser) => {
           // Create a user in your Firebase realtime database
-          return (
-            this.props.firebase
-              .user(authUser.user.uid)
-              // .("(Faculty) => " + fname + " " + lname)
-              .set({
-                name: fname + " " + lname,
-                email,
-                access_code: accesscode,
-                password: passwordOne,
-                role,
-              })
-          );
+          return this.props.firebase.user(authUser.user.uid).set({
+            name: fname + " " + lname,
+            email,
+            college,
+            access_code: accesscode,
+            password: passwordOne,
+            role,
+          });
+        })
+        .then(() => {
+          let facTitle = fname + " " + lname;
+          // Create a user in your Firebase realtime database
+          return this.props.firebase.faculty(facTitle, college).set({
+            name: fname + " " + lname,
+            email,
+            college,
+            access_code: accesscode,
+            password: passwordOne,
+            role,
+          });
         })
         .then(() => {
           this.setState({ ...INITIAL_STATE });
@@ -133,14 +161,17 @@ class SignUpFormBase extends Component {
       fname,
       lname,
       email,
+      college,
       accesscode,
       passwordOne,
       passwordTwo,
       error,
+
+      college_list,
     } = this.state;
 
     return (
-      <form onSubmit={this.onSubmit}>
+      <form onSubmit={this.onSubmit} className="FacSignupForm">
         <div className="flex-grp flex-fila-grp">
           <div className="group fi-name">
             <input
@@ -175,15 +206,21 @@ class SignUpFormBase extends Component {
             />
             <label className="placeholder">Email ID</label>
           </div>
-          <div className="group">
-            <input
-              type="number"
-              name="accesscode"
-              className="input"
-              value={accesscode}
+          <div className="group dropdown-group">
+            <select
+              className="Dropdown"
+              value={college}
               onChange={this.onChange}
-            />
-            <label className="placeholder">Access Code</label>
+              name="college"
+            >
+              <option>--SELECT--</option>
+              {college_list.map((e, key) => {
+                return <option key={key}>{e.name}</option>;
+              })}
+            </select>
+            <label className="dropdown-placeholder">
+              <label>College</label>
+            </label>
           </div>
         </div>
         <br />
@@ -209,6 +246,20 @@ class SignUpFormBase extends Component {
             <label className="placeholder">Confirm Password</label>
           </div>
         </div>
+
+        <br />
+        <div className="group">
+          <input
+            type="number"
+            name="accesscode"
+            className="input"
+            value={accesscode}
+            onChange={this.onChange}
+          />
+          <label className="placeholder">Access Code</label>
+        </div>
+
+        <TermsCheckbox />
 
         <button type="submit" name="submit" className="SubmitBut">
           Submit
@@ -241,6 +292,6 @@ const SignInLink = () => (
 
 const SignUpFacForm = compose(withRouter, withFirebase)(SignUpFormBase);
 
-export default SignUpFacPage;
+export default SignUpFacultyPageCondition;
 
-export { SignUpFacForm, SignInLink };
+export { SignUpFacForm };

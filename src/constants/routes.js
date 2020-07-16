@@ -7,6 +7,8 @@ export const HOME = "/home";
 export const ACCOUNT = "/account";
 export const PASSWORD_FORGET = "/pw-forget";
 export const PASSWORD_UPDATE = "/pw-update";
+export const PROFILE = "/profile";
+export const CLASSROOM = "/classroom";
 
 // export const ADMIN = '/admin';
 // export const ADMIN_DETAILS = '/admin/:id';

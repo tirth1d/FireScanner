@@ -1,2 +1,2 @@
-export const STUDENT = "STUDENT";
-export const FACULTY = "FACULTY";
+export const STUDENT = "Student";
+export const FACULTY = "Faculty";

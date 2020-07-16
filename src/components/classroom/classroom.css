@@ -1,0 +1,370 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+/* .classRoomSectionMain {
+   font-family: "Poppins", sans-serif; 
+} */
+
+.EditBarMain {
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  transform: translateY(-100%);
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  background-color: #4885ed;
+}
+
+.EditBarBgShapeLeft,
+.EditBarBgShapeRight {
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50px;
+  transition: all 250ms ease;
+}
+
+.EditBarBgShapeLeft:hover,
+.EditBarBgShapeRight:hover {
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+}
+
+.EditBarBgShapeLeft:hover .editBarEditBtnIcon,
+.EditBarBgShapeRight:hover .editBarDelBtnIcon {
+  color: #4885ed;
+}
+
+.EditBarBgShapeLeft {
+  margin-left: 20px;
+}
+.EditBarBgShapeRight {
+  margin-right: 20px;
+}
+.EditBarBgShapeMid {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background-color: #ffffff;
+}
+
+.editBarAddBtn {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  height: 46px;
+  width: 46px;
+  border-radius: 50px;
+  background-color: #ea3c53;
+  transition: all 250ms ease;
+}
+
+.editBarAddBtnIcon {
+  color: #ffffff;
+  font-size: 18px;
+  transition: all 250ms ease;
+}
+
+.editBarEditBtnIcon {
+  color: #ffffff;
+}
+
+.editBarDelBtnIcon {
+  color: #ffffff;
+}
+
+.rotate {
+  font-size: 22px;
+  transform: rotate(135deg);
+}
+
+/*Add Classroom Main*/
+.quesCardsMain {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0);
+  transition: all 50ms ease-in-out;
+}
+.bgBlurCardList {
+  display: none;
+}
+.unscroll {
+  display: block;
+  background-color: transparent;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.visible {
+  transform: scale(1);
+  visibility: visible;
+  transition: all 250ms ease-in-out;
+}
+
+.quesCardOne,
+.quesCardTwo,
+.quesCardThree {
+  z-index: 1000;
+  display: block;
+  border-radius: 10px;
+  max-width: 350px;
+  padding: 25px 30px;
+  background-color: #3b75f3;
+  text-align: center;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.hide {
+  display: none;
+}
+
+.quesCardOne p,
+.quesCardTwo p,
+.quesCardThree p {
+  margin: 0;
+  padding: 0 10px;
+}
+
+.queCardOneForm,
+.queCardTwoForm,
+.queCardThreeForm {
+  display: block;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.collegeListDropdown,
+.SubjectNameDropdown {
+  width: 150px;
+  height: 40px;
+  padding: 0px 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-right: 10px;
+}
+
+.SemesterListDropdown,
+.DivisionListDropdown,
+.ShiftListDropdown {
+  width: 70px;
+  height: 40px;
+  padding: 0px 10px;
+  border: none;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.queCardOnebtn,
+.queCardTwobtn,
+.queCardThreebtn {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-left: 10px;
+}
+
+.queCardOnebtnIcon,
+.queCardTwobtnIcon,
+.queCardThreebtnIcon {
+  font-size: 16px;
+  color: #454545;
+}
+
+.queCardThreebtn {
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50px;
+  margin-top: 15px;
+  margin-left: 0px;
+  background-color: #ea3c53;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.queCardThreebtnIcon {
+  color: #fff;
+  font-size: 18px;
+}
+
+/*Class List Section*/
+
+.classListSection {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+}
+
+.classListNavBar {
+  filter: blur(0px);
+  z-index: 1000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+  box-shadow: 0 0px 10px #eeeeee;
+  height: 50px;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 150ms ease-in-out;
+}
+.classListNavHeader {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 22px;
+  font-weight: 700;
+  padding: 0;
+  margin: 0;
+}
+
+.classCardMainFacStuSection {
+  filter: blur(0px);
+  z-index: 10;
+  overflow: scroll;
+  height: auto;
+  width: 100vw;
+  margin-top: 52px;
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 150ms ease-in-out;
+}
+
+.blur {
+  filter: blur(6px);
+  z-index: -1;
+  transition: all 250ms ease-in-out;
+}
+
+/*To hide the scrollbar - Second Technique Hahahahahahahaha*/
+.classCardMainFacStuSection::-webkit-scrollbar {
+  display: none;
+}
+
+.classCardMain {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: 88vw;
+  height: 110px;
+  margin-top: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0px 6px #eceaea;
+
+  /* background-color: #efeefd; */
+}
+
+.classCardMainSideStraps {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 3px;
+  background-color: #4885ed;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  transition: all 100ms ease-in-out;
+}
+
+.strapsSlide {
+  cursor: default;
+  width: 100%;
+  border-radius: 10px;
+  transition: all 250ms ease-in-out;
+  /* display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center; */
+}
+
+.strapsSlideClose {
+  position: absolute;
+  top: 0;
+
+  height: 3px;
+  width: 100%;
+  background-color: #4885ed;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  transition: all 100ms ease-in-out;
+}
+
+.classCardMainSideStrapsGenerateBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.classCardMainSideStrapsCloseBtn {
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  width: 25px;
+  height: 25px;
+  border: none;
+  border-radius: 50px;
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.showStrapsBtn {
+  visibility: visible;
+  opacity: 1;
+  transition: all 250ms ease-in-out 300ms;
+}
+
+.hideStrapsBtn {
+  visibility: hidden;
+  opacity: 0;
+  transition: all 100ms ease-in-out;
+}

@@ -1,5 +1,15 @@
+label {
+  margin: -1px;
+}
+
+.error-text {
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
 .StuSignupForm,
-.FacSignupForm {
+.FacSignupForm,
+.profileForm {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -11,19 +21,19 @@
 
 form {
   position: relative;
-  margin-top: 30px;
+  margin-top: 27px;
   left: 50%;
   transform: translateX(-50%);
   border-radius: 20px;
   background-color: white;
   display: inline-block;
-  padding: 40px 36px;
-  padding-top: 30px;
+  padding: 26px 36px;
+  padding-bottom: 20px;
   border: 2px solid #f0f0f0;
   text-align: center;
 }
 
-input,
+.input,
 .dropdown-group {
   border: 1px solid #e1e1e1;
   border-radius: 5px;
@@ -55,7 +65,7 @@ input,
   text-align: center;
 }
 
-input:focus + .placeholder {
+.input:focus + .placeholder {
   background-color: #ffffff;
   padding-left: 6px;
   padding-right: 6px;
@@ -131,6 +141,7 @@ input:focus + .placeholder {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 18px;
 }
 .group-checkbox div:first-child {
   margin-right: 8px;
@@ -177,14 +188,14 @@ input:focus + .placeholder {
   width: 200px;
 }
 
-.fi-name input {
+.fi-name .input {
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   border-top-left-radius: 50px;
   border-bottom-left-radius: 50px;
 }
 
-.la-name input {
+.la-name .input {
   border-top-right-radius: 50px;
   border-bottom-right-radius: 50px;
   border-top-left-radius: 10px;
@@ -214,20 +225,20 @@ input:focus + .placeholder {
     display: unset;
   }
 
-  .fi-name input,
-  .la-name input {
+  .fi-name .input,
+  .la-name .input {
     padding-left: 10px;
     width: 350px;
   }
 
-  .fi-name input {
+  .fi-name .input {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
   }
 
-  .la-name input {
+  .la-name .input {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     border-top-left-radius: 5px;
@@ -253,9 +264,11 @@ input:focus + .placeholder {
     margin-top: 20px;
     width: 70vw;
     padding-top: 15px;
-    padding-bottom: 30px;
+    padding-bottom: 25px;
+    padding-left: 26px;
+    padding-right: 26px;
   }
-  input,
+  .input,
   .dropdown-group {
     border: 1px solid #e1e1e1;
     border-radius: 5px;
@@ -264,15 +277,15 @@ input:focus + .placeholder {
     font-size: 14px;
   }
 
-  .fi-name input,
-  .la-name input {
+  .fi-name .input,
+  .la-name .input {
     padding-left: 10px;
     width: 68vw;
   }
 
   .Dropdown {
-    width: 80px;
-    padding: 0px 10px;
+    width: 70px;
+    padding: 0px 0px;
     border: 1px solid #e1e1e1;
   }
   .SubmitBut {

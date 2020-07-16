@@ -1,0 +1,100 @@
+.input::-webkit-scrollbar {
+  /*To make Scrollbar invisible*/
+  height: 0;
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+
+.input {
+  font-size: 14px;
+}
+
+.placeholder {
+  text-align: center;
+  font-size: 13px;
+  left: 5%;
+  transform: translate(-5%, -38%);
+}
+
+form {
+  /* margin-top: 10px; */
+  padding-bottom: 30px;
+}
+
+.middleInputField {
+  width: 200px;
+  border-radius: 50px;
+}
+
+.resetBtn,
+.editBtn {
+  cursor: pointer;
+  border: none;
+  padding: 8px 30px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 15px;
+  word-spacing: 1px;
+  font-weight: 500;
+  transition: all 250ms ease-in-out;
+}
+
+.ProfileInputBtn {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.resetBtn {
+  margin-right: 10px;
+  background-color: #fd6767;
+}
+.resetBtn:hover {
+  background-color: #fd2e2e;
+}
+.editBtn {
+  margin-left: 10px;
+  background-color: #576ef1;
+}
+.editBtn:hover {
+  background-color: #2242fa;
+}
+
+@media screen and (max-width: 550px) {
+  form {
+    /* margin-top: 20px; */
+    padding-bottom: 22px;
+    margin-bottom: 30px;
+  }
+  .input {
+    font-size: 13px;
+  }
+  .placeholder {
+    font-size: 12px;
+  }
+  .middleInputField {
+    width: 68vw;
+    border-radius: 5px;
+  }
+
+  .resetBtn,
+  .editBtn {
+    padding: 8px 20px;
+  }
+
+  .ProfileInputBtn {
+    position: unset;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    margin-top: 10px;
+  }
+  .resetBtn {
+    margin-right: 0px;
+    margin-bottom: 6px;
+  }
+  .editBtn {
+    margin-left: 0px;
+    margin-top: 6px;
+  }
+}

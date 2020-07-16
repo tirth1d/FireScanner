@@ -1,39 +1,126 @@
-import React from "react";
+import React, { Component } from "react";
+
 import { Link } from "react-router-dom";
+import * as ROUTES from "../../constants/routes";
+
 import { compose } from "recompose";
 import { withAuthorization, withEmailVerification } from "../Session";
-import SignOutButton from "../Forms/SignOut";
+import ChecklistImg from "../../images/checklist_hand.png";
+import "./home.css";
 
-import { AuthUserContext } from "../Session";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import * as ROUTES from "../../constants/routes";
-import * as ROLE from "../../constants/role";
+class HomePage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isToggle: false,
+    };
+  }
 
-const HomePage = () => (
-  <AuthUserContext.Consumer>
-    {(authUser) => (
-      <div>
-        <h1>Home Page</h1>
+  hamburgerToggle = () => {
+    this.setState({ isToggle: !this.state.isToggle });
+  };
 
-        {!!authUser.role[ROLE.STUDENT] && (
-          <p>The Home Page is accessible by every Students.</p>
-        )}
-        {!!authUser.role[ROLE.FACULTY] && (
-          <p>The Home Page is accessible by every Faculty Members.</p>
-        )}
+  render() {
+    return (
+      <div className="homeMainDesktop">
+        <div className="homeMain">
+          <header>
+            <nav className="hamburgerNav">
+              <Link
+                to={ROUTES.PROFILE}
+                className="LinkProfile"
+                style={{ textDecoration: `none` }}
+              >
+                <div
+                  className={
+                    !this.state.isToggle ? "hamburgerBtn" : "hamburgerBtn open"
+                  }
+                >
+                  Profile
+                </div>
+              </Link>
 
-        <PasswordUpdateLink />
-        <SignOutButton />
+              <div
+                onClick={this.hamburgerToggle}
+                className={
+                  !this.state.isToggle ? "hamburger" : "hamburger open"
+                }
+              >
+                <span></span>
+              </div>
+              <div
+                onClick={this.props.firebase.doSignOut}
+                className={
+                  !this.state.isToggle ? "hamburgerBtn" : "hamburgerBtn open"
+                }
+              >
+                Log Out
+              </div>
+            </nav>
+          </header>
+          <div className="headerParagraph">
+            <p className="headerParaHeader">
+              Record and Manage your Attendance Easily
+            </p>
+            <p className="headerParaSubHeader">
+              Mark your attendance for all subjects or according to your
+              timetable
+            </p>
+            <Link
+              to={ROUTES.CLASSROOM}
+              className="LinkClassroom"
+              style={{ textDecoration: `none` }}
+            >
+              <div className="headerParaButton">
+                <div className="headerParaButton_para">
+                  Get into the Classroom
+                </div>
+                <div className="headerParaButton_icon_div">
+                  <FontAwesomeIcon
+                    icon="arrow-right"
+                    className="headerParaButton_icon"
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="checklistImage">
+            <img src={ChecklistImg} alt="Attendance Checklist" />
+          </div>
+        </div>
       </div>
-    )}
-  </AuthUserContext.Consumer>
-);
+    );
+  }
+}
 
-const PasswordUpdateLink = () => (
-  <p>
-    <Link to={ROUTES.PASSWORD_UPDATE}>Update Password?</Link>
-  </p>
-);
+// const HomePage = () => (
+
+//   // <AuthUserContext.Consumer>
+//   //   {(authUser) => (
+//   //     <div>
+//   //       <h1>Home Page</h1>
+
+//   //       {!!authUser.role[ROLE.STUDENT] && (
+//   //         <p>The Home Page is accessible by every Students.</p>
+//   //       )}
+//   //       {!!authUser.role[ROLE.FACULTY] && (
+//   //         <p>The Home Page is accessible by every Faculty Members.</p>
+//   //       )}
+
+//   //       <PasswordUpdateLink />
+//   //       <SignOutButton />
+//   //     </div>
+//   //   )}
+//   // </AuthUserContext.Consumer>
+// );
+
+// // const PasswordUpdateLink = () => (
+// //   <p>
+// //     <Link to={ROUTES.PASSWORD_UPDATE}>Update Password?</Link>
+// //   </p>
+// // );
 
 const condition = (authUser) => !!authUser;
 

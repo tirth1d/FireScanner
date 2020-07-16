@@ -60,10 +60,9 @@ class Firebase {
           .once("value")
           .then((snapshot) => {
             const dbUser = snapshot.val();
-
             // default empty roles
             if (!dbUser.role) {
-              dbUser.role = {};
+              dbUser.role = "";
             }
 
             // merge auth and db user
@@ -86,13 +85,23 @@ class Firebase {
 
   user = (uid) => this.db.ref(`users/${uid}`);
 
-  users = () => this.db.ref("users");
+  student = (stuNamE, clgName) => this.db.ref(`Students/${clgName}/${stuNamE}`);
+
+  studentSubjects = (clgName) => this.db.ref(`Faculties/${clgName}`);
+
+  faculty = (facName, clgName) =>
+    this.db.ref(`Faculties/${clgName}/${facName}`);
+
+  facultySubjects = (facName, clgName) =>
+    this.db.ref(`Faculties/${clgName}/${facName}/subjects`);
+
+  // users = () => this.db.ref("users");
 
   // *** Message API ***
 
-  message = (uid) => this.db.ref(`messages/${uid}`);
+  // message = (uid) => this.db.ref(`messages/${uid}`);
 
-  messages = () => this.db.ref("messages");
+  // messages = () => this.db.ref("messages");
 }
 
 export default Firebase;

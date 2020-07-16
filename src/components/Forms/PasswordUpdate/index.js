@@ -62,6 +62,7 @@ class PasswordUpdateFormBase extends Component {
             value={passwordOne}
             onChange={this.onChange}
             type="password"
+            className="input"
           />
           <label className="placeholder">New Password</label>
         </div>
@@ -73,6 +74,7 @@ class PasswordUpdateFormBase extends Component {
             value={passwordTwo}
             onChange={this.onChange}
             type="password"
+            className="input"
           />
           <label className="placeholder">Confirm Password</label>
         </div>

@@ -1,11 +1,23 @@
-import React from "react";
+import React, { Component } from "react";
+
+import { compose } from "recompose";
 
 import { withFirebase } from "../../Configuration";
 
-const SignOutButton = ({ firebase }) => (
-  <button type="button" onClick={firebase.doSignOut}>
-    Sign Out
-  </button>
-);
+class SignUpFormBase extends Component {
+  // doSignOutBtn = () => {
+  //   this.props.firebase.doSignOut();
+  // };
 
-export default withFirebase(SignOutButton);
+  render() {
+    return (
+      <form onSubmit={this.props.firebase.doSignOut}>
+        <button type="submit" name="submit">
+          Sign Out
+        </button>
+      </form>
+    );
+  }
+}
+
+export default compose(withFirebase)(SignUpFormBase);
