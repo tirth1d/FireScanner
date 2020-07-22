@@ -19,10 +19,27 @@ import {
   faPlus,
   faPencilAlt,
   faTrashAlt,
+  faUndo,
+  faDatabase,
+  faDownload,
+  faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
+
 import ProfilePage from "../Forms/Profile";
 import Classroom from "../classroom";
-library.add(faArrowRight, faMinus, faPlus, faPencilAlt, faTrashAlt);
+import Records from "../records";
+
+library.add(
+  faArrowRight,
+  faMinus,
+  faPlus,
+  faPencilAlt,
+  faTrashAlt,
+  faUndo,
+  faDownload,
+  faDatabase,
+  faSignOutAlt
+);
 
 const App = () => (
   <Router>
@@ -38,6 +55,7 @@ const App = () => (
         <Route path={ROUTES.PASSWORD_UPDATE} component={PasswordUpdate} />
         <Route path={ROUTES.PROFILE} component={ProfilePage} />
         <Route path={ROUTES.CLASSROOM} component={Classroom} />
+        <Route path={ROUTES.RECORDS} component={Records} />
       </Switch>
     </div>
   </Router>

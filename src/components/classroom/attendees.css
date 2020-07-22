@@ -1,0 +1,270 @@
+.AttendeeBaseMain {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f3f4f8;
+}
+.AttendeeBaseMainHide {
+  display: none;
+}
+.AttendeeBaseMainHeader {
+  /* position: absolute;
+  left: 0; */
+  height: 14vh;
+  width: 100%;
+  background-color: #4885ed;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  animation: ping_pong 1s;
+}
+
+@keyframes ping_pong {
+  0% {
+    top: -100%;
+  }
+  10% {
+    top: -10%;
+  }
+  20% {
+    top: 0%;
+  }
+  30% {
+    top: -8%;
+  }
+  40% {
+    top: 0%;
+  }
+  50% {
+    top: -6%;
+  }
+  60% {
+    top: 0%;
+  }
+  70% {
+    top: -4%;
+  }
+  80% {
+    top: 0%;
+  }
+  90% {
+    top: -2%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.AttendeeBaseMainHeaderContent {
+  text-align: left;
+}
+
+.AttendeeBaseMainHeaderName {
+  font-size: 26px;
+  color: #ffffff;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+}
+
+.AttendeeBaseMainHeaderDateInfo {
+  font-size: 12px;
+  color: #ffffff;
+  font-weight: 200;
+  margin: 0;
+  padding: 0;
+}
+
+.circleStudentsCount {
+  color: #ffffff;
+}
+
+.AttendeeBaseMainStudentCountTotalNo {
+  font-size: 22px;
+  font-weight: 600;
+  padding: 0;
+  margin: 0;
+}
+
+.AttendeeBaseMainStudentCountAttendeesNo {
+  font-size: 22px;
+  font-weight: 600;
+  padding: 0;
+  margin: 0;
+}
+
+/*Student Attendance Card*/
+.AttendeeBaseMainContent {
+  height: 85.6vh;
+  width: 100%;
+  /* background-color: yellowgreen; */
+  margin-top: 2px;
+}
+.StudentAttendanceCardMain::-webkit-scrollbar {
+  display: none;
+}
+.StudentAttendanceCardMain {
+  height: 100%;
+  width: 100%;
+  overflow-y: scroll;
+}
+.StudentAttendanceCard {
+  height: 35px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.StudentAttendanceCard:first-child {
+  margin-top: 14px;
+}
+.StudentAttendanceCard:last-child {
+  margin-bottom: 60px;
+}
+
+.StudentAttendanceCardInfo {
+  font-size: 16px;
+  font-weight: 600;
+  padding-left: 15px;
+  height: 35px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+}
+
+.StudentAttendanceCardInfoEnrolNo {
+  display: block;
+}
+.StudentAttendanceCardInfoName {
+  display: block;
+}
+
+.StudentAttendanceCardInfoEnrolNoHide {
+  display: none;
+}
+.StudentAttendanceCardInfoNameHide {
+  display: none;
+}
+
+.StudentAttendanceCardBtn {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  align-items: center;
+}
+
+.StudentAttendanceCardBtnAddCancel {
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+  background-color: transparent;
+  border: 2px solid #9d9d9d;
+  border-radius: 50%;
+  margin-right: 5px;
+  color: #9d9d9d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 800;
+  /* transform: rotate(45deg); */
+}
+
+.StudentAttendanceCardInfoHide {
+  display: none;
+}
+
+.StudentAttendanceCardBtnIndicator {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background-color: #db3236;
+  margin-right: 15px;
+  margin-left: 5px;
+}
+.StudentAttendanceCardBtnIndicatorOn {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  margin-right: 15px;
+  margin-left: 5px;
+  background-color: #4885ed;
+}
+
+/*AttendeeBase Main Leave Btn Div*/
+
+.AttendeeBaseMainLeaveBtnDiv {
+  margin: 20px 0;
+  height: auto;
+  width: 100%;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 250ms ease-in-out;
+}
+
+.AttendeeBaseMainLeaveBtn {
+  cursor: pointer;
+  height: 32px;
+  width: 90%;
+  background-color: #db3236;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.AttendeeBaseMainLeaveChoiceBtnDiv {
+  margin: 20px 0;
+  margin-bottom: 30px;
+  height: auto;
+  width: 100%;
+  background-color: transparent;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  transition: all 250ms ease-in-out;
+}
+
+.AttendeeBaseMainDownloadBtn,
+.AttendeeBaseMainAddDBBtn,
+.AttendeeBaseMainExitBtn {
+  cursor: pointer;
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.AttendeeBaseMainDownloadBtn {
+  background-color: #4885ed;
+  margin-left: 10px;
+}
+.AttendeeBaseMainAddDBBtn {
+  background-color: #9d9d9d;
+}
+.AttendeeBaseMainExitBtn {
+  background-color: #db3236;
+  margin-right: 10px;
+}

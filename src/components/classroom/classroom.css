@@ -1,8 +1,195 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-/* .classRoomSectionMain {
-   font-family: "Poppins", sans-serif; 
+/*Navigation Bar*/
+.classListNavBar {
+  filter: blur(0px);
+  z-index: 1000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+  box-shadow: 0 0px 10px #eeeeee;
+  height: 50px;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 150ms ease-in-out;
+}
+.classListNavHeader {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 22px;
+  font-weight: 700;
+  padding: 0;
+  margin: 0;
+}
+/* .classListSectionhamburgerNav {
 } */
+
+.classListHamburger {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 20px;
+  transition: all 250ms ease-in-out;
+  padding: 8px;
+}
+
+.classListHamburgerClose {
+  z-index: 100;
+  position: absolute;
+  top: 2.4%;
+  right: 6%;
+  cursor: pointer;
+  padding: 8px;
+}
+.classListHamburgerLineOneClose,
+.classListHamburgerLineTwoClose {
+  background-color: #454545;
+  height: 1.5px;
+  width: 20px;
+  border-radius: 1px;
+}
+
+.classListHamburgerLineOneClose {
+  transform: rotate(135deg) translate(1px, -0px);
+}
+.classListHamburgerLineTwoClose {
+  transform: rotate(-135deg) translate(1px, 0px);
+}
+
+.classListHamburgerLineOne,
+.classListHamburgerLineTwo,
+.classListHamburgerLineThree {
+  display: block;
+  background: #454545;
+  height: 0.125em;
+  width: 1.2em;
+  border-radius: 1px;
+  transition: all 0.4s ease;
+}
+
+.classListHamburgerLineOne {
+  transform: translateY(-3px);
+}
+
+.classListHamburgerLineTwo {
+  transform: translateY(0px);
+}
+
+.classListHamburgerLineThree {
+  transform: translateY(3px);
+}
+
+.classListHamburgerOpen .classListHamburgerLineOne,
+.classListHamburgerOpen .classListHamburgerLineTwo,
+.classListHamburgerOpen .classListHamburgerLineThree {
+  background: transparent;
+}
+
+.classListNavBarSlider {
+  height: 100vh;
+  width: 270px;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 10px #9d9d9d;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0, 1);
+  transform-origin: left;
+  transition: all 100ms ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.classListNavBarSliderSlide {
+  transform: scale(1, 1);
+  transition: all 250ms ease-in-out;
+}
+
+.classListNavBarBanner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.classListNavBarBannerImg {
+  z-index: 1;
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-top: 70px;
+}
+
+.classListNavBarBannerImg img {
+  height: 100%;
+  width: 100%;
+}
+
+.classListNavBarBannerHeader {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 15px;
+  padding: 0;
+}
+
+.classListNavBarBannerHeader p {
+  margin: 0;
+  padding: 0;
+}
+
+.classListNavBarNavList {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+}
+
+.classListNavBarNavList ul {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  list-style: none;
+}
+
+.classListNavBarNavList ul li {
+  cursor: pointer;
+  padding: 12px 0;
+  border: 1px solid #cccccc;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  transition: all 250ms ease-in;
+  color: #454545;
+}
+
+/*Some Issues with Navigation Links*/
+/* .classListNavBarNavList ul li:first-child {
+  background-color: #f5f5f5;
+  color: #000000;
+}
+
+.classListNavBarNavList ul li:last-child {
+  border-bottom: 1px solid #cccccc;
+}
+
+.classListNavBarNavListLinkProfile {
+  border-bottom: none;
+  background-color: transparent;
+  color: #454545;
+} */
+.classListNavBarNavList ul li:hover {
+  background-color: #f5f5f5;
+  color: #000000;
+}
 
 .EditBarMain {
   z-index: 100;
@@ -229,35 +416,10 @@
   justify-content: center;
 }
 
-.classListNavBar {
-  filter: blur(0px);
-  z-index: 1000;
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: #ffffff;
-  border-bottom: 1px solid #eeeeee;
-  box-shadow: 0 0px 10px #eeeeee;
-  height: 50px;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: all 150ms ease-in-out;
-}
-.classListNavHeader {
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-size: 22px;
-  font-weight: 700;
-  padding: 0;
-  margin: 0;
-}
-
 .classCardMainFacStuSection {
   filter: blur(0px);
   z-index: 10;
-  overflow: scroll;
+  overflow-x: scroll;
   height: auto;
   width: 100vw;
   margin-top: 52px;
@@ -284,12 +446,14 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 88vw;
   height: 110px;
   margin-top: 20px;
   border-radius: 10px;
   background-color: #fff;
   box-shadow: 0 0px 6px #eceaea;
+  text-align: center;
 
   /* background-color: #efeefd; */
 }
@@ -297,27 +461,25 @@
 .classCardMainSideStraps {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   height: 100%;
-  width: 3px;
+  width: 0px;
   background-color: #4885ed;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  transition: all 100ms ease-in-out;
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  transition: all 150ms ease-in-out;
+  transform-origin: left;
 }
 
 .strapsSlide {
   cursor: default;
   width: 100%;
   border-radius: 10px;
-  transition: all 250ms ease-in-out;
-  /* display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center; */
+  transition: all 400ms ease-in-out;
+  transform-origin: left;
 }
 
-.strapsSlideClose {
+/* .strapsSlideClose {
   position: absolute;
   top: 0;
 
@@ -327,7 +489,7 @@
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   transition: all 100ms ease-in-out;
-}
+} */
 
 .classCardMainSideStrapsGenerateBtn {
   position: absolute;
@@ -337,25 +499,33 @@
   cursor: pointer;
   visibility: hidden;
   opacity: 0;
-  padding: 9px 12px;
+  width: 210px;
+  height: 35px;
   border: none;
   border-radius: 8px;
   background-color: #fff;
   font-size: 14px;
-}
-
-.classCardMainSideStrapsCloseBtn {
-  cursor: pointer;
-  visibility: hidden;
-  opacity: 0;
-  width: 25px;
-  height: 25px;
-  border: none;
-  border-radius: 50px;
-  background-color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+.classCardMainSideStrapsGenerateBtnRandom {
+  width: 160px;
+  height: 40px;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+  opacity: 0;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  font-size: 18px;
 }
 .showStrapsBtn {
   visibility: visible;
@@ -367,4 +537,80 @@
   visibility: hidden;
   opacity: 0;
   transition: all 100ms ease-in-out;
+}
+
+.classCardMainSideStrapsGenerateBtnRandomAgain,
+.classCardMainSideStrapsGenerateBtnRandomNext {
+  cursor: pointer;
+  width: 35px;
+  height: 25px;
+  border-radius: 5px;
+}
+
+.classCardMainSideStrapsGenerateBtnRandomNext {
+  height: 84%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 2.3%;
+  background-color: #ea3c53;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.classCardMainSideStrapsGenerateBtnRandomAgain {
+  height: 84%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 2.3%;
+  background-color: #3b75f3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.classCardMainSideStrapsGenerateBtnRandomAgainIcon,
+.classCardMainSideStrapsGenerateBtnRandomNextIcon {
+  color: #fff;
+  font-weight: 700;
+}
+
+@media screen and (min-width: 850px) {
+  .classRoomSectionMain {
+    overflow-y: hidden;
+    box-shadow: 0px 0px 8px #eeeeee;
+    border-radius: 20px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 90vh;
+  }
+
+  .classListSection,
+  .quesCardsMain {
+    height: 100%;
+  }
+
+  .classListNavBarSlider {
+    height: 90vh;
+  }
+
+  .EditBarMain,
+  .classListSection,
+  .classListNavBar,
+  .bgBlurCardList,
+  .quesCardsMain {
+    width: 380px;
+  }
+
+  .classListNavBar {
+    position: fixed;
+  }
+
+  .classCardMain {
+    width: 340px;
+  }
 }

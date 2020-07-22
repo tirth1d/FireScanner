@@ -85,7 +85,7 @@ class PasswordUpdateFormBase extends Component {
           name="submit"
           className="SubmitBut"
         >
-          Reset Password
+          Reset
         </button>
 
         {error && <p>{error.message}</p>}

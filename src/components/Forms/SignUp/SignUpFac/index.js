@@ -48,6 +48,8 @@ const INITIAL_STATE = {
   error: null,
   role: ROLE.FACULTY,
   college_list: CollegeJSON,
+
+  authUserID: "",
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -114,6 +116,7 @@ class SignUpFormBase extends Component {
       this.props.firebase
         .doCreateUserWithEmailAndPassword(email, passwordOne)
         .then((authUser) => {
+          this.setState({ authUserID: authUser.user.uid });
           // Create a user in your Firebase realtime database
           return this.props.firebase.user(authUser.user.uid).set({
             name: fname + " " + lname,
@@ -125,18 +128,20 @@ class SignUpFormBase extends Component {
           });
         })
         .then(() => {
-          let facTitle = fname + " " + lname;
           // Create a user in your Firebase realtime database
-          return this.props.firebase.faculty(facTitle, college).set({
-            name: fname + " " + lname,
-            email,
-            college,
-            access_code: accesscode,
-            password: passwordOne,
-            role,
-          });
+          return this.props.firebase
+            .faculty(college, this.state.authUserID)
+            .set({
+              name: fname + " " + lname,
+              email,
+              college,
+              access_code: accesscode,
+              password: passwordOne,
+              role,
+            });
         })
         .then(() => {
+          this.setState({ authUserID: "" });
           this.setState({ ...INITIAL_STATE });
           this.props.history.push(ROUTES.HOME);
         })

@@ -1,0 +1,136 @@
+.blur {
+  filter: blur(6px);
+}
+
+.recordsCardMainSection {
+  filter: blur(0px);
+  z-index: 10;
+  overflow-x: scroll;
+  overflow-y: scroll;
+  height: auto;
+  width: 100vw;
+  margin-top: 52px;
+  padding-top: 4px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 150ms ease-in-out;
+}
+
+.recordsCardMainFacSection {
+  transition: all 150ms ease-in-out;
+}
+
+.recordsCardMainFacSectionBlur {
+  filter: blur(6px) !important;
+  transition: all 250ms ease-in-out;
+}
+
+/*To hide the scrollbar - Second Technique Hahahahahahahaha*/
+.recordsCardMainSection::-webkit-scrollbar {
+  display: none;
+}
+
+.recordsCardMain {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88vw;
+  height: 110px;
+  margin-top: 20px;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 0px 6px #eceaea;
+  text-align: center;
+}
+
+.RecordsListMainSection {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+}
+
+.RecordsListMainSectionHide {
+  display: none;
+}
+
+.RecordsListCardsHeader {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+  margin: 10px 0 15px 0;
+}
+.RecordsListCardsMain {
+  background-color: #fff;
+  width: 90%;
+  max-height: 300px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: scroll;
+  border: 2px solid #eceaea;
+}
+
+/*To hide the scrollbar - Second Technique Hahahahahahahaha*/
+.RecordsListCardsMain::-webkit-scrollbar {
+  display: none;
+}
+
+.RecordsListCard {
+  width: 100%;
+  height: 34px;
+  background-color: #fff;
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid #dddddd;
+  transition: all 100ms ease-in-out;
+}
+
+.RecordsListCard:hover {
+  background-color: #eceaea;
+  transition: all 250ms ease-in-out;
+}
+.RecordsListCard:last-child {
+  border-bottom: none;
+}
+
+.RecordsListCardDR {
+  display: flex;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+}
+
+.RecordsListDownloadBtn {
+  width: 40px;
+  cursor: pointer;
+  color: #8d8d8d;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.RecordsListMainSectionCloseBtn {
+  cursor: pointer;
+  margin-top: 15px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}

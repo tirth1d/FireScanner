@@ -54,6 +54,8 @@ const INITIAL_STATE = {
 
   college_list: CollegeJSON,
   course_list: [],
+
+  authUserId: "",
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -147,6 +149,7 @@ class SignUpFormBase extends Component {
       this.props.firebase
         .doCreateUserWithEmailAndPassword(email, passwordOne)
         .then((authUser) => {
+          this.setState({ authUserId: authUser.user.uid });
           // Create a user in your Firebase realtime database
           return this.props.firebase.user(authUser.user.uid).set({
             name: fname + " " + lname,
@@ -162,20 +165,22 @@ class SignUpFormBase extends Component {
           });
         })
         .then(() => {
-          let stuTitle = `${fname} ${lname} - ${enrolno}`;
+          // let stuTitle = `${fname} ${lname} - ${enrolno}`;
           // Create a user in your Firebase realtime database
-          return this.props.firebase.student(stuTitle, college).set({
-            name: fname + " " + lname,
-            enrolment_no: enrolno,
-            college,
-            department,
-            semester,
-            division,
-            email,
-            shift,
-            password: passwordOne,
-            role: role,
-          });
+          return this.props.firebase
+            .student(college, this.state.authUserId)
+            .set({
+              name: fname + " " + lname,
+              enrolment_no: enrolno,
+              college,
+              department,
+              semester,
+              division,
+              email,
+              shift,
+              password: passwordOne,
+              role: role,
+            });
         })
         .then(() => {
           // console.log("Successfully Signed Up.");
@@ -438,7 +443,7 @@ class SignUpFormBase extends Component {
 
 const SignInLink = () => (
   <p style={{ textAlign: `center`, marginTop: `50px`, marginBottom: `50px` }}>
-    Already have an account?{" "}
+    Already have an account?
     <Link
       to={ROUTES.SIGN_IN}
       style={{

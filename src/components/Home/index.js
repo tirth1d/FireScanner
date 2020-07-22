@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, withRouter } from "react-router-dom";
 import * as ROUTES from "../../constants/routes";
 
 import { compose } from "recompose";
@@ -20,6 +20,11 @@ class HomePage extends Component {
 
   hamburgerToggle = () => {
     this.setState({ isToggle: !this.state.isToggle });
+  };
+
+  ReloadRedirect = () => {
+    this.props.history.push(ROUTES.CLASSROOM);
+    window.location.reload(true);
   };
 
   render() {
@@ -68,23 +73,18 @@ class HomePage extends Component {
               Mark your attendance for all subjects or according to your
               timetable
             </p>
-            <Link
-              to={ROUTES.CLASSROOM}
-              className="LinkClassroom"
-              style={{ textDecoration: `none` }}
-            >
-              <div className="headerParaButton">
-                <div className="headerParaButton_para">
-                  Get into the Classroom
-                </div>
-                <div className="headerParaButton_icon_div">
-                  <FontAwesomeIcon
-                    icon="arrow-right"
-                    className="headerParaButton_icon"
-                  />
-                </div>
+
+            <div className="headerParaButton" onClick={this.ReloadRedirect}>
+              <div className="headerParaButton_para">
+                Get into the Classroom
               </div>
-            </Link>
+              <div className="headerParaButton_icon_div">
+                <FontAwesomeIcon
+                  icon="arrow-right"
+                  className="headerParaButton_icon"
+                />
+              </div>
+            </div>
           </div>
           <div className="checklistImage">
             <img src={ChecklistImg} alt="Attendance Checklist" />
@@ -125,6 +125,7 @@ class HomePage extends Component {
 const condition = (authUser) => !!authUser;
 
 export default compose(
+  withRouter,
   withEmailVerification,
   withAuthorization(condition)
 )(HomePage);

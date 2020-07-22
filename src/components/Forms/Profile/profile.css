@@ -16,22 +16,34 @@
   transform: translate(-5%, -38%);
 }
 
+.profilePageBaseMain {
+  height: 100vh;
+  width: 100%;
+  background-color: #fcfcfc;
+  overflow-x: scroll;
+  transition: all 250ms ease-in-out;
+}
+
+.visibleProfilePageBaseMain {
+  pointer-events: none;
+  filter: blur(6px);
+}
+
 form {
-  /* margin-top: 10px; */
-  padding-bottom: 30px;
+  padding-bottom: 14px;
+  margin-bottom: 60px;
 }
 
-.middleInputField {
-  width: 200px;
-  border-radius: 50px;
-}
-
-.resetBtn,
-.editBtn {
+.editFontawesomeBtn,
+.deleteFontawesomeBtn {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   border: none;
-  padding: 8px 30px;
-  border-radius: 6px;
   color: #fff;
   font-size: 15px;
   word-spacing: 1px;
@@ -39,47 +51,116 @@ form {
   transition: all 250ms ease-in-out;
 }
 
-.ProfileInputBtn {
+.ProfileEditDelBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
-  bottom: -18px;
+  bottom: -20px;
   left: 50%;
   transform: translateX(-50%);
 }
-.resetBtn {
+.editFontawesomeBtn {
   margin-right: 10px;
-  background-color: #fd6767;
-}
-.resetBtn:hover {
-  background-color: #fd2e2e;
-}
-.editBtn {
-  margin-left: 10px;
   background-color: #576ef1;
 }
-.editBtn:hover {
+.editFontawesomeBtn:hover {
   background-color: #2242fa;
 }
+.deleteFontawesomeBtn {
+  margin-left: 10px;
+  background-color: #fd6767;
+}
+.deleteFontawesomeBtn:hover {
+  background-color: #fd2e2e;
+}
 
-@media screen and (max-width: 550px) {
+.deleteConfirmationBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  height: 150px;
+  background-color: #576ef1;
+  text-align: center;
+  border-radius: 8px;
+  transition: all 250ms ease-in-out;
+}
+
+.visibleDelConfirmationBox {
+  visibility: visible;
+  opacity: 1;
+}
+
+.deleteConfirmationBoxHeaderMainP,
+.deleteConfirmationBoxHeaderSubP {
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+.deleteConfirmationBoxHeaderMainP {
+  font-size: 24px;
+  font-weight: 800;
+  margin-top: -4px;
+}
+
+.deleteConfirmationBoxHeaderSubP {
+  font-size: 14px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.deleteConfirmationBoxBtn {
+  cursor: pointer;
+  display: flex;
+  margin-top: 25px;
+}
+
+.deleteConfirmationBoxBtnNo,
+.deleteConfirmationBoxBtnYes {
+  width: 120px;
+  height: 30px;
+  font-size: 14px;
+  background-color: #fff;
+  border-radius: 6px;
+  margin: 0 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.deleteConfirmationBoxBtnNo {
+  width: 70px;
+}
+
+.deleteConfirmationBoxBtnYes {
+  background-color: #fd6767;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+@media screen and (max-width: 370px) {
+  .deleteConfirmationBox {
+    width: 300px;
+    height: 150px;
+  }
+
   form {
-    /* margin-top: 20px; */
-    padding-bottom: 22px;
-    margin-bottom: 30px;
+    padding-bottom: 40px;
   }
   .input {
     font-size: 13px;
   }
   .placeholder {
     font-size: 12px;
-  }
-  .middleInputField {
-    width: 68vw;
-    border-radius: 5px;
-  }
-
-  .resetBtn,
-  .editBtn {
-    padding: 8px 20px;
   }
 
   .ProfileInputBtn {
@@ -89,10 +170,7 @@ form {
     transform: none;
     margin-top: 10px;
   }
-  .resetBtn {
-    margin-right: 0px;
-    margin-bottom: 6px;
-  }
+
   .editBtn {
     margin-left: 0px;
     margin-top: 6px;

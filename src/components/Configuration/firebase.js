@@ -51,6 +51,8 @@ class Firebase {
   doPasswordUpdate = (password) =>
     this.auth.currentUser.updatePassword(password);
 
+  doAccountDelete = () => this.auth.currentUser.delete();
+
   // *** Merge Auth and DB User API *** //
 
   onAuthUserListener = (next, fallback) =>
@@ -85,15 +87,24 @@ class Firebase {
 
   user = (uid) => this.db.ref(`users/${uid}`);
 
-  student = (stuNamE, clgName) => this.db.ref(`Students/${clgName}/${stuNamE}`);
+  studentList = (clgName) => this.db.ref(`Students/${clgName}`);
+
+  student = (clgName, stuId) => this.db.ref(`Students/${clgName}/${stuId}`);
 
   studentSubjects = (clgName) => this.db.ref(`Faculties/${clgName}`);
 
-  faculty = (facName, clgName) =>
-    this.db.ref(`Faculties/${clgName}/${facName}`);
+  faculty = (clgName, facId) => this.db.ref(`Faculties/${clgName}/${facId}`);
 
-  facultySubjects = (facName, clgName) =>
-    this.db.ref(`Faculties/${clgName}/${facName}/subjects`);
+  facultySubjects = (facId, clgName) =>
+    this.db.ref(`Faculties/${clgName}/${facId}/subjects`);
+
+  studentLength = (collegeName, facId, subId) =>
+    this.db.ref(`Faculties/${collegeName}/${facId}/subjects/${subId}/students`);
+
+  studentLengthAttendance = (collegeName, facId, subId, stuId) =>
+    this.db.ref(
+      `Faculties/${collegeName}/${facId}/subjects/${subId}/students/${stuId}`
+    );
 
   // users = () => this.db.ref("users");
 
