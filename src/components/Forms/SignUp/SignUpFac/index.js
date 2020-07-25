@@ -70,6 +70,14 @@ class SignUpFormBase extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
+  onChangeCollege = (event) => {
+    this.setState({
+      [event.target.name]: this.state.college_list.find(
+        (college) => `${college.code} - ${college.name}` === event.target.value
+      ).name,
+    });
+  };
+
   onSubmit = (event) => {
     const {
       fname,
@@ -82,24 +90,22 @@ class SignUpFormBase extends Component {
       role,
     } = this.state;
 
-    // let role = "";
-
-    // if (isFaculty) {
-    //   //Usually we don't need isFaculty condition as it is always gonna be true bu i'm keeping it fot better understanding purposes.
-    //   role = ROLE.FACULTY;
-    // }
-
     this.setState({ error: null });
 
     if (
       passwordOne === "" &&
       passwordTwo === "" &&
       fname === "" &&
-      (lname === "") & (email === "") &&
+      lname === "" &&
+      email === "" &&
       accesscode === "" &&
       college === ""
     ) {
       this.setState({ error: "Please Fill Everything Up Properly" });
+    } else if (college === "--SELECT--") {
+      this.setState({ error: "Please Select the right Options" });
+    } else if (accesscode.length !== 4 && accesscode.length !== 6) {
+      this.setState({ error: "Access code must be of 4 or 6 digits" });
     } else if (fname === "" || lname === "") {
       this.setState({ error: "Please Enter Your First & Last Name Properly" });
     } else if (email === "") {
@@ -123,7 +129,6 @@ class SignUpFormBase extends Component {
             email,
             college,
             access_code: accesscode,
-            password: passwordOne,
             role,
           });
         })
@@ -136,7 +141,6 @@ class SignUpFormBase extends Component {
               email,
               college,
               access_code: accesscode,
-              password: passwordOne,
               role,
             });
         })
@@ -176,7 +180,11 @@ class SignUpFormBase extends Component {
     } = this.state;
 
     return (
-      <form onSubmit={this.onSubmit} className="FacSignupForm">
+      <form
+        onSubmit={this.onSubmit}
+        className="FacSignupForm"
+        autoComplete="off"
+      >
         <div className="flex-grp flex-fila-grp">
           <div className="group fi-name">
             <input
@@ -186,7 +194,11 @@ class SignUpFormBase extends Component {
               value={fname}
               onChange={this.onChange}
             />
-            <label className="placeholder">First Name</label>
+            <label
+              className={fname !== "" ? "placeholder above" : "placeholder"}
+            >
+              First Name
+            </label>
           </div>
           <div className="group la-name">
             <input
@@ -196,31 +208,44 @@ class SignUpFormBase extends Component {
               value={lname}
               onChange={this.onChange}
             />
-            <label className="placeholder">Last Name</label>
+            <label
+              className={lname !== "" ? "placeholder above" : "placeholder"}
+            >
+              Last Name
+            </label>
           </div>
         </div>
         <br />
         <div className="flex-grp">
           <div className="group">
             <input
+              autoComplete="nope"
               type="email"
               name="email"
               className="input"
               value={email}
               onChange={this.onChange}
             />
-            <label className="placeholder">Email ID</label>
+            <label
+              className={email !== "" ? "placeholder above" : "placeholder"}
+            >
+              Email ID
+            </label>
           </div>
           <div className="group dropdown-group">
             <select
               className="Dropdown"
               value={college}
-              onChange={this.onChange}
+              onChange={this.onChangeCollege}
               name="college"
             >
               <option>--SELECT--</option>
               {college_list.map((e, key) => {
-                return <option key={key}>{e.name}</option>;
+                return (
+                  <option key={key}>
+                    {e.code} - {e.name}
+                  </option>
+                );
               })}
             </select>
             <label className="dropdown-placeholder">
@@ -232,23 +257,37 @@ class SignUpFormBase extends Component {
         <div className="flex-grp">
           <div className="group">
             <input
+              autoComplete="new-password"
               type="password"
               name="passwordOne"
               className="input"
               value={passwordOne}
               onChange={this.onChange}
             />
-            <label className="placeholder">Password</label>
+            <label
+              className={
+                passwordOne !== "" ? "placeholder above" : "placeholder"
+              }
+            >
+              Password
+            </label>
           </div>
           <div className="group">
             <input
+              autoComplete="new-password"
               type="password"
               name="passwordTwo"
               className="input"
               value={passwordTwo}
               onChange={this.onChange}
             />
-            <label className="placeholder">Confirm Password</label>
+            <label
+              className={
+                passwordTwo !== "" ? "placeholder above" : "placeholder"
+              }
+            >
+              Confirm Password
+            </label>
           </div>
         </div>
 
@@ -261,7 +300,11 @@ class SignUpFormBase extends Component {
             value={accesscode}
             onChange={this.onChange}
           />
-          <label className="placeholder">Access Code</label>
+          <label
+            className={accesscode !== "" ? "placeholder above" : "placeholder"}
+          >
+            Access Code
+          </label>
         </div>
 
         <TermsCheckbox />
@@ -270,7 +313,6 @@ class SignUpFormBase extends Component {
           Submit
         </button>
         <div className="error-text">
-          {/* {error && <p style={{ color: `#ff0000` }}>*{error.message}*</p>} */}
           {error && <p style={{ color: `#ff0000` }}>*{error}*</p>}
         </div>
       </form>
@@ -279,14 +321,21 @@ class SignUpFormBase extends Component {
 }
 
 const SignInLink = () => (
-  <p style={{ textAlign: `center`, marginTop: `50px` }}>
+  <p
+    style={{
+      textAlign: `center`,
+      padding: `0`,
+      paddingBottom: `60px`,
+      margin: `0`,
+    }}
+  >
     Already have an account?{" "}
     <Link
       style={{
         textDecoration: `none`,
         color: `#0000ff`,
         fontWeight: `500`,
-        marginLeft: `5px`,
+        paddingLeft: `5px`,
       }}
       to={ROUTES.SIGN_IN}
     >

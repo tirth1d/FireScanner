@@ -39,7 +39,7 @@ form {
   border-radius: 5px;
   padding: 10px;
   width: 350px;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .dropdown-group {
@@ -63,6 +63,7 @@ form {
   color: #8d8d8d;
   transition: all 200ms ease-in-out;
   text-align: center;
+  font-size: 14px;
 }
 
 .input:focus + .placeholder {
@@ -104,7 +105,7 @@ form {
 
 .SubmitBut {
   position: absolute;
-  bottom: -20px;
+  bottom: -17px;
   left: 50%;
   transform: translateX(-50%);
   cursor: pointer;
@@ -115,16 +116,13 @@ form {
   font-size: 16px;
   word-spacing: 1px;
   font-weight: 500;
-  border: 2px solid #ff0000;
-  background-color: #ff0000;
+  background-color: #f56868;
   transform-origin: center;
   transition: all 250ms ease-in-out;
 }
 
 .SubmitBut:hover {
-  background-color: #fff;
-  border: 2px solid #ff0000;
-  color: #000;
+  background-color: red;
 }
 
 .flex-grp {
@@ -141,7 +139,7 @@ form {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 0px;
 }
 .group-checkbox div:first-child {
   margin-right: 8px;
@@ -156,7 +154,6 @@ form {
 }
 .checkbox-div-active {
   border: 1px solid #0000ff;
-
   display: flex;
   justify-content: center;
   align-items: center;
@@ -215,6 +212,11 @@ form {
   margin-left: 8px;
 }
 
+.group-checkbox {
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
 @media screen and (max-width: 950px) {
   form {
     width: 400px;
@@ -250,12 +252,12 @@ form {
   }
 
   .group-checkbox {
-    margin-top: 16px;
-    margin-bottom: 12px;
+    margin-top: 10px;
+    margin-bottom: 0px;
   }
 }
 
-@media screen and (max-width: 500px) {
+@media screen and (max-width: 700px) {
   form {
     font-size: 14px;
     display: flex;
@@ -264,8 +266,9 @@ form {
     margin-top: 20px;
     width: 70vw;
     padding-top: 15px;
-    padding-bottom: 25px;
+    padding-bottom: 26px !important;
     padding-left: 26px;
+    font-size: 14px !important;
     padding-right: 26px;
   }
   .input,
@@ -274,19 +277,28 @@ form {
     border-radius: 5px;
     padding: 10px;
     width: 68vw;
+  }
+  .dropdown-group {
+    padding: 8px 10px;
+  }
+  .placeholder {
+    font-size: 15px;
+  }
+  .dropdown-placeholder {
     font-size: 14px;
   }
-
   .fi-name .input,
   .la-name .input {
     padding-left: 10px;
     width: 68vw;
+    font-size: 14px;
   }
 
   .Dropdown {
     width: 70px;
     padding: 0px 0px;
     border: 1px solid #e1e1e1;
+    font-size: 14px;
   }
   .SubmitBut {
     font-size: 14px;
@@ -301,6 +313,6 @@ form {
 
   .group-checkbox {
     margin-top: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 0px;
   }
 }

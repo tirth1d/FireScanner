@@ -6,7 +6,7 @@ import * as ROUTES from "../../../constants/routes";
 import * as ROLES from "../../../constants/role";
 
 import AuthUserContext from "../../Session/context";
-import SignUpStuPage from "../SignUp/SignUpStu";
+import SignInPage from "../SignIn";
 
 import { compose } from "recompose";
 import { withFirebase } from "../../Configuration";
@@ -25,7 +25,7 @@ class ProfilePageCondition extends Component {
   render() {
     return (
       <AuthUserContext.Consumer>
-        {(authUser) => (condition(authUser) ? <Profile /> : <SignUpStuPage />)}
+        {(authUser) => (condition(authUser) ? <Profile /> : <SignInPage />)}
       </AuthUserContext.Consumer>
     );
   }
@@ -49,6 +49,59 @@ class ProfilePageBase extends Component {
     this.setState({ onClickAccountDel: false });
   };
 
+  doAccountDeletion = () => {
+    if (this.state.authUser.role === "Student") {
+      this.props.firebase.doAccountDelete();
+      if (this.props.firebase.doAccountDelete()) {
+        this.props.firebase.user(this.state.authUser.uid).remove();
+        this.props.firebase
+          .student(this.state.authUser.college, this.state.authUser.uid)
+          .remove();
+
+        this.props.firebase
+          .studentSubjects(this.state.authUser.college)
+          .on("child_added", (snapshot) => {
+            var facKey = snapshot.key;
+
+            this.props.firebase
+              .faculty(this.state.authUser.college, facKey)
+              .child(`subjects`)
+              .on("child_added", (snapshot) => {
+                var subKey = snapshot.key;
+
+                this.props.firebase
+                  .studentLengthAttendance(
+                    this.state.authUser.college,
+                    facKey,
+                    subKey,
+                    this.state.authUser.uid
+                  )
+                  .remove();
+              });
+          });
+      }
+    }
+
+    if (this.state.authUser.role === "Faculty") {
+      this.props.firebase.doAccountDelete();
+      if (this.props.firebase.doAccountDelete()) {
+        this.props.firebase.user(this.state.authUser.uid).remove();
+        this.props.firebase
+          .faculty(this.state.authUser.college, this.state.authUser.uid)
+          .remove();
+      }
+    }
+  };
+
+  onClickSignOut = () => {
+    if (
+      prompt("Enter 'Sign Out' & Press OK to Log Out.", "Sign Out") ===
+      "Sign Out"
+    ) {
+      this.props.firebase.doSignOut();
+    }
+  };
+
   render() {
     return (
       <div>
@@ -68,13 +121,13 @@ class ProfilePageBase extends Component {
             <form className="profileForm">
               <div className="flex-grp">
                 <div className="group">
-                  <div className="input">
+                  <div className="inputProfile input">
                     {this.state.authUser.name}
                     <label
                       className={
                         this.state.authUser.name !== ""
-                          ? "placeholder above"
-                          : "placeholder"
+                          ? "placeholderProfile placeholder above"
+                          : "placeholderProfile placeholder"
                       }
                     >
                       Name
@@ -82,13 +135,13 @@ class ProfilePageBase extends Component {
                   </div>
                 </div>
                 <div className="group">
-                  <div className="input">
+                  <div className="inputProfile input">
                     {this.state.authUser.email}
                     <label
                       className={
                         this.state.authUser.email !== ""
-                          ? "placeholder above"
-                          : "placeholder"
+                          ? "placeholderProfile placeholder above"
+                          : "placeholderProfile placeholder"
                       }
                     >
                       Email ID
@@ -100,13 +153,13 @@ class ProfilePageBase extends Component {
               <div className="flex-grp">
                 {this.state.authUser.role === ROLES.STUDENT && (
                   <div className="group">
-                    <div className="input">
+                    <div className="inputProfile input">
                       {this.state.authUser.enrolment_no}
                       <label
                         className={
                           this.state.authUser.enrolment_no !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Enrolment No.
@@ -116,15 +169,15 @@ class ProfilePageBase extends Component {
                 )}
                 <div className="group">
                   <div
-                    className="input"
+                    className="inputProfile input"
                     style={{ whiteSpace: `nowrap`, overflowY: `hidden` }}
                   >
                     {this.state.authUser.college}
                     <label
                       className={
                         this.state.authUser.college !== ""
-                          ? "placeholder above"
-                          : "placeholder"
+                          ? "placeholderProfile placeholder above"
+                          : "placeholderProfile placeholder"
                       }
                     >
                       College
@@ -134,15 +187,15 @@ class ProfilePageBase extends Component {
                 {this.state.authUser.role === ROLES.FACULTY && (
                   <div className="group">
                     <div
-                      className="input"
+                      className="inputProfile input"
                       style={{ whiteSpace: `nowrap`, overflowY: `hidden` }}
                     >
                       {this.state.authUser.access_code}
                       <label
                         className={
                           this.state.authUser.college !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Access Code
@@ -156,13 +209,13 @@ class ProfilePageBase extends Component {
               {this.state.authUser.role === ROLES.STUDENT && (
                 <div className="flex-grp">
                   <div className="group">
-                    <div className="input">
+                    <div className="inputProfile input">
                       {this.state.authUser.department}
                       <label
                         className={
                           this.state.authUser.department !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Department
@@ -170,13 +223,13 @@ class ProfilePageBase extends Component {
                     </div>
                   </div>
                   <div className="group">
-                    <div className="input">
+                    <div className="inputProfile input">
                       {this.state.authUser.division}
                       <label
                         className={
                           this.state.authUser.division !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Division
@@ -191,13 +244,13 @@ class ProfilePageBase extends Component {
               {this.state.authUser.role === ROLES.STUDENT && (
                 <div className="flex-grp">
                   <div className="group">
-                    <div className="input">
+                    <div className="inputProfile input">
                       {this.state.authUser.semester}
                       <label
                         className={
                           this.state.authUser.semester !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Semester
@@ -205,13 +258,13 @@ class ProfilePageBase extends Component {
                     </div>
                   </div>
                   <div className="group">
-                    <div className="input">
+                    <div className="inputProfile input">
                       {this.state.authUser.shift}
                       <label
                         className={
                           this.state.authUser.shift !== ""
-                            ? "placeholder above"
-                            : "placeholder"
+                            ? "placeholderProfile placeholder above"
+                            : "placeholderProfile placeholder"
                         }
                       >
                         Shift
@@ -233,6 +286,12 @@ class ProfilePageBase extends Component {
                   onClick={this._onClickAccountDel}
                 >
                   <FontAwesomeIcon icon="trash-alt" />
+                </div>
+                <div
+                  className="signOutFontawesomeBtn"
+                  onClick={this.onClickSignOut}
+                >
+                  <FontAwesomeIcon icon="sign-out-alt" />
                 </div>
               </div>
             </form>
@@ -260,7 +319,7 @@ class ProfilePageBase extends Component {
             </div>
             <div
               className="deleteConfirmationBoxBtnYes"
-              onClick={this.props.firebase.doAccountDelete}
+              onClick={this.doAccountDeletion}
             >
               Yes, Delete It
             </div>

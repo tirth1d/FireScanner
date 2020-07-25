@@ -21,7 +21,7 @@ const LoginPageCondition = () => (
 );
 
 const SignInPage = () => (
-  <div style={{ backgroundColor: `#FCFCFC` }}>
+  <div style={{ backgroundColor: `#FCFCFC`, height: `100vh` }}>
     <Banner
       banner={StuLoginBanner}
       alt="FcaulLoginBanner"
@@ -33,16 +33,6 @@ const SignInPage = () => (
     <PasswordForgetLink />
   </div>
 );
-
-// const ERROR_CODE_ACCOUNT_EXISTS =
-//   "auth/account-exists-with-different-credential";
-
-// const ERROR_MSG_ACCOUNT_EXISTS = `
-//   An account with an E-Mail address to
-//   this social account already exists. Try to login from
-//   this account instead and associate your social accounts on
-//   your personal account page.
-// `;
 
 const INITIAL_STATE = {
   email: "",
@@ -69,7 +59,7 @@ class SignInFormBase extends Component {
         this.props.history.push(ROUTES.HOME);
       })
       .catch((error) => {
-        this.setState({ error });
+        this.setState({ error: error.message });
       });
   };
 
@@ -81,7 +71,7 @@ class SignInFormBase extends Component {
     const { email, password, error } = this.state;
 
     return (
-      <form onSubmit={this.onSubmit}>
+      <form onSubmit={this.onSubmit} autoComplete="off">
         <div className="flex-grp">
           <div className="group">
             <input
@@ -90,8 +80,13 @@ class SignInFormBase extends Component {
               className="input"
               value={email}
               onChange={this.onChange}
+              autoComplete="nope"
             />
-            <label className="placeholder">Email ID</label>
+            <label
+              className={email !== "" ? "placeholder above" : "placeholder"}
+            >
+              Email ID
+            </label>
           </div>
         </div>
         <br />
@@ -103,8 +98,13 @@ class SignInFormBase extends Component {
               className="input"
               value={password}
               onChange={this.onChange}
+              autoComplete="new-password"
             />
-            <label className="placeholder">Password</label>
+            <label
+              className={password !== "" ? "placeholder above" : "placeholder"}
+            >
+              Password
+            </label>
           </div>
         </div>
         <br />
@@ -113,7 +113,9 @@ class SignInFormBase extends Component {
           Log In
         </button>
 
-        {error && <p>{error.message}</p>}
+        <div className="error-text">
+          {error && <p style={{ color: `#ff0000` }}>*{error}*</p>}
+        </div>
       </form>
     );
   }
@@ -136,13 +138,13 @@ const SignUpLink = () => (
   </p>
 );
 const PasswordForgetLink = () => (
-  <p style={{ textAlign: `center`, marginTop: `20px` }}>
+  <p style={{ textAlign: `center`, margin: `0px`, padding: `0px` }}>
     <Link
       style={{
         textDecoration: `none`,
         color: `#0000ff`,
         fontWeight: `500`,
-        marginLeft: `5px`,
+        paddingLeft: `5px`,
       }}
       to={ROUTES.PASSWORD_FORGET}
     >

@@ -5,11 +5,11 @@
   background: transparent; /* make scrollbar transparent */
 }
 
-.input {
+.inputProfile {
   font-size: 14px;
 }
 
-.placeholder {
+.placeholderProfile {
   text-align: center;
   font-size: 13px;
   left: 5%;
@@ -35,7 +35,8 @@ form {
 }
 
 .editFontawesomeBtn,
-.deleteFontawesomeBtn {
+.deleteFontawesomeBtn,
+.signOutFontawesomeBtn {
   height: 40px;
   width: 40px;
   border-radius: 50%;
@@ -64,17 +65,26 @@ form {
   margin-right: 10px;
   background-color: #576ef1;
 }
+
 .editFontawesomeBtn:hover {
   background-color: #2242fa;
 }
 .deleteFontawesomeBtn {
   margin-left: 10px;
+  margin-right: 10px;
   background-color: #fd6767;
 }
 .deleteFontawesomeBtn:hover {
   background-color: #fd2e2e;
 }
 
+.signOutFontawesomeBtn {
+  margin-left: 10px;
+  background-color: #576ef1;
+}
+.signOutFontawesomeBtn:hover {
+  background-color: #2242fa;
+}
 .deleteConfirmationBox {
   display: flex;
   flex-direction: column;
@@ -153,9 +163,6 @@ form {
     height: 150px;
   }
 
-  form {
-    padding-bottom: 40px;
-  }
   .input {
     font-size: 13px;
   }

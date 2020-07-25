@@ -23,6 +23,7 @@ import {
   faDatabase,
   faDownload,
   faSignOutAlt,
+  faPrint,
 } from "@fortawesome/free-solid-svg-icons";
 
 import ProfilePage from "../Forms/Profile";
@@ -38,7 +39,8 @@ library.add(
   faUndo,
   faDownload,
   faDatabase,
-  faSignOutAlt
+  faSignOutAlt,
+  faPrint
 );
 
 const App = () => (

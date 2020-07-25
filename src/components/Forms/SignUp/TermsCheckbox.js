@@ -16,12 +16,14 @@ class TermsCheckbox extends Component {
   }
   render() {
     return (
-      <div className="group-checkbox">
+      <div
+        className="group-checkbox"
+        onClick={() => this.checkboxToggleClass()}
+      >
         <div
           className={
             this.state.active ? "checkbox-div-active" : "checkbox-div-inactive"
           }
-          onClick={() => this.checkboxToggleClass()}
         >
           <FontAwesomeIcon icon="minus" />
         </div>

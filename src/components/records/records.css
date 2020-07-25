@@ -1,35 +1,53 @@
-.blur {
-  filter: blur(6px);
+.MainRecordsSectionDesktop {
+  height: auto;
+}
+
+.MainRecordsSectionDesktopOverflowHide {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.MainRecordsSectionDesktop::-webkit-scrollbar {
+  display: none;
+}
+
+.classListNavBar {
+  position: fixed;
 }
 
 .recordsCardMainSection {
-  filter: blur(0px);
-  z-index: 10;
-  overflow-x: scroll;
-  overflow-y: scroll;
-  height: auto;
-  width: 100vw;
+  width: 100%;
   margin-top: 52px;
   padding-top: 4px;
-  padding-bottom: 20px;
+  padding-bottom: 50px;
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: all 150ms ease-in-out;
 }
 
+/*To hide the scrollbar - Second Technique Hahahahahahahaha*/
+.recordsCardMainSection::-webkit-scrollbar {
+  display: none;
+}
+
+.recordsCardMainSectionOverflowHide {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
 .recordsCardMainFacSection {
   transition: all 150ms ease-in-out;
 }
 
-.recordsCardMainFacSectionBlur {
-  filter: blur(6px) !important;
-  transition: all 250ms ease-in-out;
-}
-
-/*To hide the scrollbar - Second Technique Hahahahahahahaha*/
-.recordsCardMainSection::-webkit-scrollbar {
-  display: none;
+.blur {
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .recordsCardMain {
@@ -47,6 +65,8 @@
 }
 
 .RecordsListMainSection {
+  opacity: 1;
+  z-index: 1000;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -56,10 +76,7 @@
   justify-content: center;
   align-items: center;
   width: 90%;
-}
-
-.RecordsListMainSectionHide {
-  display: none;
+  transition: all 350ms ease-in-out;
 }
 
 .RecordsListCardsHeader {
@@ -105,6 +122,7 @@
 }
 
 .RecordsListCardDR {
+  cursor: default;
   display: flex;
   height: 100%;
   display: flex;
@@ -133,4 +151,36 @@
   align-items: center;
   justify-content: center;
   color: #fff;
+}
+
+.recordsCardMainInfoDeptParagraph {
+  text-transform: lowercase;
+}
+
+.recordsCardMainInfoDeptParagraph::first-letter {
+  text-transform: uppercase;
+}
+
+@media screen and (min-width: 550px) {
+  .MainRecordsSectionDesktop {
+    overflow: scroll;
+    box-shadow: 0px 0px 8px #eeeeee;
+    border-radius: 20px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 90vh;
+    width: 380px;
+  }
+
+  .recordsCardMainSection {
+    height: auto;
+    padding-top: 0px;
+  }
+
+  .recordsCardMain {
+    width: 88%;
+    height: 110px;
+  }
 }

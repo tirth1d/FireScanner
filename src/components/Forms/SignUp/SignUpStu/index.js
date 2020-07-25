@@ -78,16 +78,33 @@ class SignUpFormBase extends Component {
   };
 
   onChangeCollege = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
+    this.setState({
+      [event.target.name]: this.state.college_list.find(
+        (college) => `${college.code} - ${college.name}` === event.target.value
+      ).name,
+    });
+
+    // console.log(event.target.value);
+    // console.log(
+    //   this.state.college_list.find(
+    //     (college) => `${college.code} - ${college.name}` === event.target.value
+    //   ).name
+    // );
 
     this.setState({
       course_list:
-        event.target.value && event.target.value !== "--SELECT--"
+        event.target.value &&
+        event.target.value !== "----[College Code / College Name]----"
           ? this.state.college_list.find(
-              (college) => college.name === event.target.value
+              (college) =>
+                `${college.code} - ${college.name}` === event.target.value
             ).courses
           : [],
     });
+  };
+
+  termCheckboxClick = () => {
+    console.log("Clicked");
   };
 
   onSubmit = (event) => {
@@ -122,9 +139,21 @@ class SignUpFormBase extends Component {
       semester === "" &&
       college === "" &&
       division === "" &&
-      shift === ""
+      shift === "" &&
+      passwordOne === "" &&
+      passwordTwo === "" &&
+      email === "" &&
+      enrolno === ""
     ) {
       this.setState({ error: "Please Fill Everything Up Properly" });
+    } else if (
+      semester === "--SELECT--" ||
+      division === "--SELECT--" ||
+      shift === "--SELECT--" ||
+      college === "----[College Code / College Name]----" ||
+      department === "--SELECT--"
+    ) {
+      this.setState({ error: "Please Select the right Options" });
     } else if (fname === "" || lname === "") {
       this.setState({ error: "Please Enter Your First & Last Name Properly" });
     } else if (email === "") {
@@ -135,6 +164,8 @@ class SignUpFormBase extends Component {
       this.setState({ error: "Please Select Your Division" });
     } else if (enrolno === "") {
       this.setState({ error: "Please Enter Your GTU Enrolment No." });
+    } else if (enrolno.length !== 12) {
+      this.setState({ error: "Incorrect GTU Enrolment No." });
     } else if (department === "") {
       this.setState({ error: "Please Enter Your Department" });
     } else if (shift === "") {
@@ -160,12 +191,10 @@ class SignUpFormBase extends Component {
             division,
             email,
             shift,
-            password: passwordOne,
             role: role,
           });
         })
         .then(() => {
-          // let stuTitle = `${fname} ${lname} - ${enrolno}`;
           // Create a user in your Firebase realtime database
           return this.props.firebase
             .student(college, this.state.authUserId)
@@ -178,7 +207,6 @@ class SignUpFormBase extends Component {
               division,
               email,
               shift,
-              password: passwordOne,
               role: role,
             });
         })
@@ -225,7 +253,11 @@ class SignUpFormBase extends Component {
     } = this.state;
 
     return (
-      <form onSubmit={this.onSubmit} className="StuSignupForm">
+      <form
+        onSubmit={this.onSubmit}
+        className="StuSignupForm"
+        autoComplete="off"
+      >
         <div className="flex-grp flex-fila-grp">
           <div className="group fi-name">
             <input
@@ -266,9 +298,13 @@ class SignUpFormBase extends Component {
               onChange={this.onChangeCollege}
               name="college"
             >
-              <option>--SELECT--</option>
+              <option>----[College Code / College Name]----</option>
               {college_list.map((e, key) => {
-                return <option key={key}>{e.name}</option>;
+                return (
+                  <option key={key}>
+                    {e.code} - {e.name}
+                  </option>
+                );
               })}
             </select>
             <label className="dropdown-placeholder">
@@ -354,6 +390,7 @@ class SignUpFormBase extends Component {
 
           <div className="group">
             <input
+              autoComplete="nope"
               type="email"
               name="email"
               className="input"
@@ -392,6 +429,7 @@ class SignUpFormBase extends Component {
           </div>
           <div className="group">
             <input
+              autoComplete="new-password"
               type="password"
               name="passwordOne"
               className="input"
@@ -411,6 +449,7 @@ class SignUpFormBase extends Component {
         <div className="flex-grp flex-fila-grp">
           <div className="group">
             <input
+              autoComplete="new-password"
               type="password"
               name="passwordTwo"
               className="input"
@@ -427,7 +466,7 @@ class SignUpFormBase extends Component {
           </div>
         </div>
 
-        <TermCheckbox />
+        <TermCheckbox onClick={this.termCheckboxClick} />
 
         <button type="submit" name="submit" className="SubmitBut">
           Submit
@@ -442,7 +481,14 @@ class SignUpFormBase extends Component {
 }
 
 const SignInLink = () => (
-  <p style={{ textAlign: `center`, marginTop: `50px`, marginBottom: `50px` }}>
+  <p
+    style={{
+      textAlign: `center`,
+      padding: `0`,
+      paddingBottom: `60px`,
+      margin: `0`,
+    }}
+  >
     Already have an account?
     <Link
       to={ROUTES.SIGN_IN}
@@ -450,7 +496,7 @@ const SignInLink = () => (
         textDecoration: `none`,
         color: `#0000ff`,
         fontWeight: `500`,
-        marginLeft: `5px`,
+        paddingLeft: `5px`,
       }}
     >
       Sign In

@@ -56,10 +56,11 @@ class PasswordForgetFormBase extends Component {
     const isInvalid = email === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
+      <form onSubmit={this.onSubmit} style={{ paddingBottom: `30px` }}>
         <div className="flex-group">
           <div className="group">
             <input
+              className="input"
               name="email"
               value={this.state.email}
               onChange={this.onChange}

@@ -258,13 +258,33 @@
 }
 
 .AttendeeBaseMainDownloadBtn {
-  background-color: #4885ed;
+  background-color: #9d9d9d;
   margin-left: 10px;
 }
 .AttendeeBaseMainAddDBBtn {
-  background-color: #9d9d9d;
+  background-color: #4885ed;
 }
 .AttendeeBaseMainExitBtn {
   background-color: #db3236;
   margin-right: 10px;
+}
+
+@media screen and (min-width: 550px) {
+  .AttendeeBaseMain {
+    height: 100%;
+    width: 100%;
+    background-color: #f3f4f8;
+  }
+
+  .AttendeeBaseMainContent {
+    height: 85.6%;
+    width: 100%;
+    margin-top: 2px;
+  }
+
+  .StudentAttendanceCardMain {
+    height: 100%;
+    width: 100%;
+    overflow-y: scroll;
+  }
 }

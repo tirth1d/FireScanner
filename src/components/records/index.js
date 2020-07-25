@@ -14,13 +14,19 @@ import ReactDOMServer from "react-dom/server";
 import AuthUserContext from "../Session/context";
 
 import "./records.css";
+import RecordList from "./recordList";
 
 const condition = (authUser) => !!authUser;
 
 const Records = () => (
   <AuthUserContext.Consumer>
     {(authUser) =>
-      condition(authUser) ? <RecordsWithFirebase /> : <SignInPage />
+      condition(authUser) &&
+      JSON.parse(localStorage.getItem("authUser")).role === "Faculty" ? (
+        <RecordsWithFirebase />
+      ) : (
+        <SignInPage />
+      )
     }
   </AuthUserContext.Consumer>
 );
@@ -31,15 +37,21 @@ class RecordsBaseMain extends Component {
 
     this.state = {
       isToggleHamburger: false,
+      authUser: JSON.parse(localStorage.getItem("authUser")),
       profile_name: JSON.parse(localStorage.getItem("authUser")).name,
 
       fac_college_name: JSON.parse(localStorage.getItem("authUser")).college,
       facAuthID: JSON.parse(localStorage.getItem("authUser")).uid,
 
-      blurBg: false,
-      recordsListMainSection: false,
+      subkey: "",
+      facDate: "",
+      facRandom: "",
 
-      // facAttendanceRecordCardInfoObj: {},
+      blurBg: false,
+      recordsCardMainSectionHide: false,
+      RecordsListMainSectionHide: false,
+
+      recordListTable: false,
     };
 
     this.recordsCardMainSection = React.createRef();
@@ -54,7 +66,6 @@ class RecordsBaseMain extends Component {
       .facultySubjects(this.state.facAuthID, this.state.fac_college_name)
       .on("child_added", (snapshot) => {
         var subject = snapshot.child("subject").val();
-        // var current_facultySub_key = snapshot.key;
         var department = snapshot.child("department").val();
         var semester = snapshot.child("semester").val();
         var division = snapshot.child("division").val();
@@ -66,19 +77,6 @@ class RecordsBaseMain extends Component {
           shift = snapshot.child("shift").val();
         }
 
-        // this.setState({
-        //   facAttendanceRecordCardInfoObj: {
-        //     subject,
-        //     current_facultySub_key,
-        //     department,
-        //     semester,
-        //     division,
-        //     shift,
-        //   },
-        // });
-        // const { facAttendanceRecordCardInfoObj } = this.state;
-
-        var recordsCardMainFacSection = document.createElement("div");
         var recordsCardMain = document.createElement("div");
         var recordsCardMainInfo = document.createElement("div");
         var recordsCardMainInfoSub = document.createElement("h3");
@@ -89,25 +87,7 @@ class RecordsBaseMain extends Component {
         var recordsCardMainInfoShift = document.createElement("span");
 
         recordsCardMain.className = "recordsCardMain";
-        recordsCardMainFacSection.className = "recordsCardMainFacSection";
-        recordsCardMainFacSection.className = "recordsCardMainFacSection";
 
-        this.recordsCardMainSection.current.addEventListener("click", () => {
-          recordsCardMainFacSection.classList.toggle(
-            "recordsCardMainFacSectionBlur"
-          );
-        });
-
-        this.RecordsListMainSectionCloseBtn.current.addEventListener(
-          "click",
-          () => {
-            recordsCardMainFacSection.classList.remove(
-              "recordsCardMainFacSectionBlur"
-            );
-          }
-        );
-
-        recordsCardMainFacSection.appendChild(recordsCardMain);
         recordsCardMain.appendChild(recordsCardMainInfo);
         recordsCardMainInfo.appendChild(recordsCardMainInfoSub);
         recordsCardMainInfo.appendChild(recordsCardMainInfoDept);
@@ -116,15 +96,20 @@ class RecordsBaseMain extends Component {
         recordsCardMainInfoSDShift.appendChild(recordsCardMainInfoDiv);
         recordsCardMainInfoSDShift.appendChild(recordsCardMainInfoShift);
 
+        recordsCardMainInfoDept.className = `recordsCardMainInfoDeptParagraph`;
+
         recordsCardMainInfoSub.textContent = `${subject}`;
         recordsCardMainInfoDept.textContent = department;
         recordsCardMainInfoSem.textContent = `Sem(${semester}) - `;
         recordsCardMainInfoDiv.textContent = `Div(${division}) - `;
         recordsCardMainInfoShift.textContent = `Shift(${shift})`;
 
-        recordsCardMainFacSection.addEventListener("click", () => {
-          this.setState({ blurBg: true, recordsListMainSection: true });
-
+        recordsCardMain.addEventListener("click", () => {
+          this.setState({
+            blurBg: true,
+            RecordsListMainSectionHide: true,
+          });
+          this.setState({ subkey: snapshot.key });
           this.props.firebase
             .facultySubjects(this.state.facAuthID, this.state.fac_college_name)
             .child(`${subKeys}/attendees`)
@@ -171,6 +156,17 @@ class RecordsBaseMain extends Component {
 
                   RecordsListDownloadBtn.innerHTML = RecordListCardDownloadBtn;
 
+                  RecordsListCard.addEventListener("click", () => {
+                    this.setState({ facDate: attendanceRecordDates });
+                    this.setState({ facRandom: attendanceRecordRandomNo });
+
+                    this.setState({
+                      recordListTable: true,
+                      RecordsListMainSectionHide: false,
+                      recordsCardMainSectionHide: true,
+                    });
+                  });
+
                   RecordsListCardDate.textContent = `${attendanceRecordDates} /`;
                   RecordsListCardRandom.textContent =
                     " " + attendanceRecordRandomNo;
@@ -180,19 +176,7 @@ class RecordsBaseMain extends Component {
             });
         });
 
-        this.recordsCardMainSection.current.appendChild(
-          recordsCardMainFacSection
-        );
-
-        // <div className="RecordsListCard">
-        //       <div className="RecordsListCardDR">
-        //         <div className="RecordsListCardDate">22-7-2020 /</div>
-        //         <div className="RecordsListCardRandom">&nbsp;4282</div>
-        //       </div>
-        //       <div className="RecordsListDownloadBtn">
-        //         <FontAwesomeIcon icon="download" />
-        //       </div>
-        //     </div>
+        this.recordsCardMainSection.current.appendChild(recordsCardMain);
       });
   }
 
@@ -201,116 +185,155 @@ class RecordsBaseMain extends Component {
   };
 
   recordsListMainSectionClose = () => {
-    this.setState({ blurBg: false, recordsListMainSection: false });
-    window.location.reload(true);
+    this.setState({ blurBg: false, RecordsListMainSectionHide: false });
+    // window.location.reload(true);
+  };
+
+  onFeedbackClick = () => {
+    alert(
+      "Send me your feedback on this email address => tirthpatel5885@gmail.com"
+    );
   };
 
   render() {
     return (
-      <div>
-        <div
-          className={
-            this.state.blurBg ? "classListNavBar blur" : "classListNavBar"
-          }
-        >
-          <div className="classListSectionhamburgerNav">
-            <div
-              onClick={this.hamburgerToggle}
-              className={
-                !this.state.isToggleHamburger
-                  ? "classListHamburger"
-                  : "classListHamburger classListHamburgerOpen"
-              }
-            >
-              <span className="classListHamburgerLineOne"></span>
-              <span className="classListHamburgerLineTwo"></span>
-              <span className="classListHamburgerLineThree"></span>
-            </div>
-            <div
-              className={
-                !this.state.isToggleHamburger
-                  ? "classListNavBarSlider"
-                  : "classListNavBarSlider classListNavBarSliderSlide"
-              }
-            >
+      <div
+        className={
+          this.state.blurBg
+            ? "MainRecordsSectionDesktop MainRecordsSectionDesktopOverflowHide"
+            : "MainRecordsSectionDesktop"
+        }
+      >
+        {!this.state.recordsCardMainSectionHide ? (
+          <div
+            className={
+              this.state.blurBg ? "classListNavBar blur" : "classListNavBar"
+            }
+          >
+            <div className="classListSectionhamburgerNav">
               <div
                 onClick={this.hamburgerToggle}
                 className={
                   !this.state.isToggleHamburger
-                    ? "classListHamburgerClose"
-                    : "classListHamburgerClose classListHamburgerOpen"
+                    ? "classListHamburger"
+                    : "classListHamburger classListHamburgerOpen"
                 }
               >
-                <div className="classListHamburgerLineOneClose"></div>
-                <div className="classListHamburgerLineTwoClose"></div>
+                <span className="classListHamburgerLineOne"></span>
+                <span className="classListHamburgerLineTwo"></span>
+                <span className="classListHamburgerLineThree"></span>
               </div>
-              <div className="classListNavBarBanner">
-                <div className="classListNavBarBannerImg">
-                  <img src={FacultyImg} alt="classListNavBarBannerImg" />
+              <div
+                className={
+                  !this.state.isToggleHamburger
+                    ? "classListNavBarSlider"
+                    : "classListNavBarSlider classListNavBarSliderSlide"
+                }
+              >
+                <div
+                  onClick={this.hamburgerToggle}
+                  className={
+                    !this.state.isToggleHamburger
+                      ? "classListHamburgerClose"
+                      : "classListHamburgerClose classListHamburgerOpen"
+                  }
+                >
+                  <FontAwesomeIcon
+                    icon="plus"
+                    style={{
+                      transform: `rotate(45deg)`,
+                      fontSize: `20px`,
+                      color: `#8d8d8d`,
+                    }}
+                  />
                 </div>
-                <div className="classListNavBarBannerHeader">
-                  <p>{this.state.profile_name}</p>
+                <div className="classListNavBarBanner">
+                  <div className="classListNavBarBannerImg">
+                    <img src={FacultyImg} alt="classListNavBarBannerImg" />
+                  </div>
+                  <div className="classListNavBarBannerHeader">
+                    <p>{this.state.profile_name}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="classListNavBarNavList">
-                <ul>
-                  <li>Classroom</li>
-                  <Link
-                    className="classListNavBarNavListLinkProfile"
-                    to={ROUTES.PROFILE}
-                    style={{ textDecoration: `none` }}
-                  >
-                    <li>Profile</li>
-                  </Link>
-                  <li>Record</li>
-                  <li onClick={this.props.firebase.doSignOut}>Log Out</li>
-                </ul>
+                <div className="classListNavBarNavList">
+                  <ul>
+                    <Link to={ROUTES.HOME} style={{ textDecoration: `none` }}>
+                      <li>Classroom</li>
+                    </Link>
+                    <Link
+                      className="classListNavBarNavListLinkProfile"
+                      to={ROUTES.PROFILE}
+                      style={{ textDecoration: `none` }}
+                    >
+                      <li>Profile</li>
+                    </Link>
+                    {this.state.authUser.role === "Faculty" && (
+                      <Link
+                        to={ROUTES.RECORDS}
+                        style={{ textDecoration: `none` }}
+                      >
+                        <li>Records</li>
+                      </Link>
+                    )}
+                    {this.state.authUser.role === "Student" && <li>ID Card</li>}
+                    <li onClick={this.onFeedbackClick}>Feedback</li>
+
+                    <li onClick={this.props.firebase.doSignOut}>Log Out</li>
+                  </ul>
+                </div>
               </div>
             </div>
+            <p className="classListNavHeader">
+              <span style={{ color: `#4885ed` }}>R</span>
+              <span style={{ color: `#db3236` }}>e</span>
+              <span style={{ color: `#f4c20d` }}>c</span>
+              <span style={{ color: `#4885ed` }}>o</span>
+              <span style={{ color: `#3cba54` }}>r</span>
+              <span style={{ color: `#db3236` }}>d</span>
+              <span style={{ color: `#f4c20d` }}>s</span>
+            </p>
           </div>
-          <p className="classListNavHeader">
-            <span style={{ color: `#4885ed` }}>R</span>
-            <span style={{ color: `#db3236` }}>e</span>
-            <span style={{ color: `#f4c20d` }}>c</span>
-            <span style={{ color: `#4885ed` }}>o</span>
-            <span style={{ color: `#3cba54` }}>r</span>
-            <span style={{ color: `#db3236` }}>d</span>
-            <span style={{ color: `#f4c20d` }}>s</span>
-          </p>
-        </div>
+        ) : null}
 
-        <div
-          ref={this.recordsCardMainSection}
-          className={
-            this.state.blurBg
-              ? "recordsCardMainSection blur"
-              : "recordsCardMainSection"
-          }
-        ></div>
-
-        <div
-          className={
-            this.state.recordsListMainSection
-              ? "RecordsListMainSection"
-              : "RecordsListMainSection RecordsListMainSectionHide"
-          }
-        >
-          <div className="RecordsListCardsHeader">Date / Random No.</div>
+        {!this.state.recordsCardMainSectionHide ? (
           <div
-            className="RecordsListCardsMain"
-            ref={this.recordsListCardMain}
+            ref={this.recordsCardMainSection}
+            className={
+              this.state.blurBg
+                ? "recordsCardMainSection blur recordsCardMainSectionOverflowHide"
+                : "recordsCardMainSection"
+            }
           ></div>
-          <div
-            ref={this.RecordsListMainSectionCloseBtn}
-            className="RecordsListMainSectionCloseBtn"
-            onClick={this.recordsListMainSectionClose}
-          >
-            <FontAwesomeIcon
-              icon="plus"
-              style={{ transform: `rotate(45deg)` }}
-            />
+        ) : null}
+
+        {!this.state.recordsCardMainSectionHide &&
+        this.state.RecordsListMainSectionHide ? (
+          <div className="RecordsListMainSection">
+            <div className="RecordsListCardsHeader">Date / Random No.</div>
+            <div
+              className="RecordsListCardsMain"
+              ref={this.recordsListCardMain}
+            ></div>
+            <div
+              ref={this.RecordsListMainSectionCloseBtn}
+              className="RecordsListMainSectionCloseBtn"
+              onClick={this.recordsListMainSectionClose}
+            >
+              <FontAwesomeIcon
+                icon="plus"
+                style={{ transform: `rotate(45deg)` }}
+              />
+            </div>
           </div>
-        </div>
+        ) : null}
+
+        {this.state.recordListTable && (
+          <RecordList
+            subkey={this.state.subkey}
+            facdate={this.state.facDate}
+            facrandom={this.state.facRandom}
+          />
+        )}
       </div>
     );
   }

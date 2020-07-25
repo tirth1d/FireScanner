@@ -55,7 +55,7 @@ class PasswordUpdateFormBase extends Component {
     const isInvalid = passwordOne !== passwordTwo || passwordOne === "";
 
     return (
-      <form onSubmit={this.onSubmit}>
+      <form onSubmit={this.onSubmit} style={{ paddingBottom: `30px` }}>
         <div className="group">
           <input
             name="passwordOne"

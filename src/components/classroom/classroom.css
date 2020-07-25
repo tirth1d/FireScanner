@@ -46,20 +46,6 @@
   cursor: pointer;
   padding: 8px;
 }
-.classListHamburgerLineOneClose,
-.classListHamburgerLineTwoClose {
-  background-color: #454545;
-  height: 1.5px;
-  width: 20px;
-  border-radius: 1px;
-}
-
-.classListHamburgerLineOneClose {
-  transform: rotate(135deg) translate(1px, -0px);
-}
-.classListHamburgerLineTwoClose {
-  transform: rotate(-135deg) translate(1px, 0px);
-}
 
 .classListHamburgerLineOne,
 .classListHamburgerLineTwo,
@@ -171,21 +157,6 @@
   color: #454545;
 }
 
-/*Some Issues with Navigation Links*/
-/* .classListNavBarNavList ul li:first-child {
-  background-color: #f5f5f5;
-  color: #000000;
-}
-
-.classListNavBarNavList ul li:last-child {
-  border-bottom: 1px solid #cccccc;
-}
-
-.classListNavBarNavListLinkProfile {
-  border-bottom: none;
-  background-color: transparent;
-  color: #454545;
-} */
 .classListNavBarNavList ul li:hover {
   background-color: #f5f5f5;
   color: #000000;
@@ -218,22 +189,18 @@
   transition: all 250ms ease;
 }
 
-.EditBarBgShapeLeft:hover,
-.EditBarBgShapeRight:hover {
-  border: 1px solid #ffffff;
-  background-color: #ffffff;
-}
-
-.EditBarBgShapeLeft:hover .editBarEditBtnIcon,
-.EditBarBgShapeRight:hover .editBarDelBtnIcon {
-  color: #4885ed;
-}
-
 .EditBarBgShapeLeft {
   margin-left: 20px;
 }
 .EditBarBgShapeRight {
   margin-right: 20px;
+}
+.EditBarBgShapeRightActive {
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+}
+.EditBarBgShapeRightActive .editBarDelBtnIcon {
+  color: #4885ed;
 }
 .EditBarBgShapeMid {
   border: none;
@@ -419,7 +386,8 @@
 .classCardMainFacStuSection {
   filter: blur(0px);
   z-index: 10;
-  overflow-x: scroll;
+  overflow-x: hidden;
+  overflow-y: scroll;
   height: auto;
   width: 100vw;
   margin-top: 52px;
@@ -471,6 +439,19 @@
   transform-origin: left;
 }
 
+.classCardMainSideStrapsDelete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 0px;
+  background-color: #ea3c53;
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  transition: all 150ms ease-in-out;
+  transform-origin: left;
+}
+
 .strapsSlide {
   cursor: default;
   width: 100%;
@@ -479,17 +460,37 @@
   transform-origin: left;
 }
 
-/* .strapsSlideClose {
-  position: absolute;
-  top: 0;
-
-  height: 3px;
+.strapsSlideDelete {
+  cursor: default;
   width: 100%;
-  background-color: #4885ed;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  transition: all 100ms ease-in-out;
-} */
+  border-radius: 10px;
+  transition: all 400ms ease-in-out;
+  transform-origin: left;
+}
+
+.classCardMainSideStrapsDeleteBtn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  width: 70px;
+  height: 70px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.classCardMainSideStrapsDeleteBtn:hover {
+  background-color: #ffffff;
+  transition: all 250ms ease-in-out 0ms;
+  color: #ea3c53;
+}
 
 .classCardMainSideStrapsGenerateBtn {
   position: absolute;
@@ -577,7 +578,31 @@
   font-weight: 700;
 }
 
-@media screen and (min-width: 850px) {
+.classCardMainInfoSubParagraph {
+  margin: 0;
+  padding: 0;
+}
+
+.classCardMainInfoDeptParagraph {
+  text-transform: lowercase;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
+  margin-top: 9px;
+}
+
+.classCardMainInfoDeptParagraph::first-letter {
+  text-transform: uppercase;
+}
+
+.classCardMainInfoSDShiftParagraph {
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
+  margin-top: 9px;
+}
+
+@media screen and (min-width: 550px) {
   .classRoomSectionMain {
     overflow-y: hidden;
     box-shadow: 0px 0px 8px #eeeeee;
@@ -596,6 +621,8 @@
 
   .classListNavBarSlider {
     height: 90vh;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
   }
 
   .EditBarMain,
@@ -607,6 +634,8 @@
   }
 
   .classListNavBar {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
     position: fixed;
   }
 
