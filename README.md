@@ -1,6 +1,6 @@
-Checkout the website on the Live Server : (https://firescanner.web.app).
+Checkout the website on the Live Server : https://firescanner.web.app
 
-For Testing purposes : (https://firedance.web.app).
+For Testing purposes : https://firedance.web.app
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
