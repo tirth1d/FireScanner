@@ -38,6 +38,7 @@ class ProfilePageBase extends Component {
     this.state = {
       authUser: JSON.parse(localStorage.getItem("authUser")),
       onClickAccountDel: false,
+      error: "",
     };
   }
 
@@ -51,8 +52,11 @@ class ProfilePageBase extends Component {
 
   doAccountDeletion = () => {
     if (this.state.authUser.role === "Student") {
-      this.props.firebase.doAccountDelete();
-      if (this.props.firebase.doAccountDelete()) {
+      this.props.firebase.doAccountDelete().catch((error) => {
+        this.setState({ error: error.message });
+      });
+
+      if (this.state.error === "") {
         this.props.firebase.user(this.state.authUser.uid).remove();
         this.props.firebase
           .student(this.state.authUser.college, this.state.authUser.uid)
@@ -79,16 +83,23 @@ class ProfilePageBase extends Component {
                   .remove();
               });
           });
+      } else {
+        console.log(this.state.error);
       }
     }
 
     if (this.state.authUser.role === "Faculty") {
-      this.props.firebase.doAccountDelete();
-      if (this.props.firebase.doAccountDelete()) {
+      this.props.firebase.doAccountDelete().catch((error) => {
+        this.setState({ error: error.message });
+      });
+
+      if (this.state.error === "") {
         this.props.firebase.user(this.state.authUser.uid).remove();
         this.props.firebase
           .faculty(this.state.authUser.college, this.state.authUser.uid)
           .remove();
+      } else {
+        console.log(this.state.error);
       }
     }
   };
@@ -294,6 +305,12 @@ class ProfilePageBase extends Component {
                   <FontAwesomeIcon icon="sign-out-alt" />
                 </div>
               </div>
+
+              {this.state.error !== "" ? (
+                <div className="error-text">
+                  <p style={{ color: `#ff0000` }}>*{this.state.error}*</p>
+                </div>
+              ) : null}
             </form>
           </div>
         </div>

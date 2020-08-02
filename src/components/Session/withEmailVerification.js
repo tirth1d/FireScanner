@@ -19,6 +19,7 @@ const withEmailVerification = (Component) => {
       this.state = {
         authUser: JSON.parse(localStorage.getItem("authUser")),
         isSent: false,
+        error: "",
       };
     }
 
@@ -30,7 +31,9 @@ const withEmailVerification = (Component) => {
 
     doLogOut = () => {
       if (prompt("Enter 'Y' & press OK to Log Out!", "Y") === "Y") {
-        this.props.firebase.doSignOut();
+        this.props.firebase.doSignOut().catch((error) => {
+          console.log(error.message);
+        });
       }
     };
 
@@ -42,8 +45,11 @@ const withEmailVerification = (Component) => {
         ) === "Delete It"
       ) {
         if (this.state.authUser.role === "Student") {
-          this.props.firebase.doAccountDelete();
-          if (this.props.firebase.doAccountDelete()) {
+          this.props.firebase.doAccountDelete().catch((error) => {
+            this.setState({ error: error.message });
+          });
+
+          if (this.state.error === "") {
             this.props.firebase.user(this.state.authUser.uid).remove();
             this.props.firebase
               .student(this.state.authUser.college, this.state.authUser.uid)
@@ -70,16 +76,23 @@ const withEmailVerification = (Component) => {
                       .remove();
                   });
               });
+          } else {
+            console.log(this.state.error);
           }
         }
 
         if (this.state.authUser.role === "Faculty") {
-          this.props.firebase.doAccountDelete();
-          if (this.props.firebase.doAccountDelete()) {
+          this.props.firebase.doAccountDelete().catch((error) => {
+            this.setState({ error: error.message });
+          });
+
+          if (this.state.error === "") {
             this.props.firebase.user(this.state.authUser.uid).remove();
             this.props.firebase
               .faculty(this.state.authUser.college, this.state.authUser.uid)
               .remove();
+          } else {
+            console.log(this.state.error);
           }
         }
       }
@@ -118,10 +131,9 @@ const withEmailVerification = (Component) => {
                       fontWeight: `600`,
                     }}
                   >
-                    E-Mail confirmation sent : Check your E-Mail (Spam folder
-                    included) for a confirmation E-Mail. Refresh this page once
-                    you confirmed your E-Mail. Click on the below button to
-                    again send confirmation email.
+                    {this.state.error !== ""
+                      ? `${this.state.error}`
+                      : "E-Mail confirmation sent : Check your E-Mail (Spam folder included) for a confirmation E-Mail. Refresh this page once you confirmed your E-Mail. Click on the below button to again send confirmation email."}
                   </p>
                 ) : (
                   <p
@@ -132,8 +144,9 @@ const withEmailVerification = (Component) => {
                       fontWeight: `600`,
                     }}
                   >
-                    Verify your E-Mail : Click on the below button to send a
-                    confirmation E-Mail to your registered mail address.
+                    {this.state.error !== ""
+                      ? `${this.state.error}`
+                      : "Verify your E-Mail : Click on the below button to send a confirmation E-Mail to your registered mail address."}
                   </p>
                 )}
 

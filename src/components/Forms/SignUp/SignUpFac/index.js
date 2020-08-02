@@ -50,6 +50,8 @@ const INITIAL_STATE = {
   college_list: CollegeJSON,
 
   authUserID: "",
+
+  termCheckboxToggle: false,
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -118,6 +120,8 @@ class SignUpFormBase extends Component {
       this.setState({ error: "Passwords are not matching" });
     } else if (passwordOne === "") {
       this.setState({ error: "Please Enter Password" });
+    } else if (!this.state.termCheckboxToggle) {
+      this.setState({ error: "Please Tick the Terms and Conditions" });
     } else {
       this.props.firebase
         .doCreateUserWithEmailAndPassword(email, passwordOne)
@@ -164,6 +168,16 @@ class SignUpFormBase extends Component {
 
     event.preventDefault();
   };
+
+  termCheckboxToggleInfo = () => {
+    this.setState({ termCheckboxToggle: !this.state.termCheckboxToggle });
+  };
+
+  componentDidMount() {
+    alert(
+      "Make sure you're a Faculty not a Student going to make an account as a Faculty, because your data will be in the hands of your Head Of Department. If you try to create any problems, you'll be in a big troble. You can visit 'firedance.web.app', if you want to do some experiments with this application as a student or want to know more faculty section. Thank you."
+    );
+  }
 
   render() {
     const {
@@ -307,7 +321,7 @@ class SignUpFormBase extends Component {
           </label>
         </div>
 
-        <TermsCheckbox />
+        <TermsCheckbox toggleInfo={this.termCheckboxToggleInfo} />
 
         <button type="submit" name="submit" className="SubmitBut">
           Submit

@@ -24,18 +24,22 @@ const SignUpStudentPageCondition = () => (
   </AuthUserContext.Consumer>
 );
 
-const SignUpStuPage = () => (
-  <div style={{ backgroundColor: `#FCFCFC` }}>
-    <Banner
-      banner={StuSignUpBanner}
-      alt="FcaulLoginBanner"
-      banner_header="Register as an Attendee"
-      banner_subheader="Please Register Your Student Profile By Filling Below Blanks"
-    />
-    <SignUpStuForm />
-    <SignInLink />
-  </div>
-);
+class SignUpStuPage extends Component {
+  render() {
+    return (
+      <div style={{ backgroundColor: `#FCFCFC` }}>
+        <Banner
+          banner={StuSignUpBanner}
+          alt="FcaulLoginBanner"
+          banner_header="Register as an Attendee"
+          banner_subheader="Please Register Your Student Profile By Filling Below Blanks"
+        />
+        <SignUpStuForm />
+        <SignInLink />
+      </div>
+    );
+  }
+}
 
 const INITIAL_STATE = {
   fname: "",
@@ -56,6 +60,8 @@ const INITIAL_STATE = {
   course_list: [],
 
   authUserId: "",
+
+  termCheckboxToggle: false,
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -101,10 +107,6 @@ class SignUpFormBase extends Component {
             ).courses
           : [],
     });
-  };
-
-  termCheckboxClick = () => {
-    console.log("Clicked");
   };
 
   onSubmit = (event) => {
@@ -176,6 +178,8 @@ class SignUpFormBase extends Component {
       this.setState({ error: "Passwords are not matching" });
     } else if (passwordOne === "") {
       this.setState({ error: "Please Enter Password" });
+    } else if (!this.state.termCheckboxToggle) {
+      this.setState({ error: "Please Tick the Terms and Conditions" });
     } else {
       this.props.firebase
         .doCreateUserWithEmailAndPassword(email, passwordOne)
@@ -231,6 +235,10 @@ class SignUpFormBase extends Component {
     }
 
     event.preventDefault();
+  };
+
+  termCheckboxToggleInfo = () => {
+    this.setState({ termCheckboxToggle: !this.state.termCheckboxToggle });
   };
 
   render() {
@@ -466,13 +474,12 @@ class SignUpFormBase extends Component {
           </div>
         </div>
 
-        <TermCheckbox onClick={this.termCheckboxClick} />
+        <TermCheckbox toggleInfo={this.termCheckboxToggleInfo} />
 
         <button type="submit" name="submit" className="SubmitBut">
           Submit
         </button>
         <div className="error-text">
-          {/* {error && <p style={{ color: `#ff0000` }}>*{error.message}*</p>} */}
           {error && <p style={{ color: `#ff0000` }}>*{error}*</p>}
         </div>
       </form>

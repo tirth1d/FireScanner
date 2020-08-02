@@ -71,7 +71,7 @@ class SignInFormBase extends Component {
     const { email, password, error } = this.state;
 
     return (
-      <form onSubmit={this.onSubmit} autoComplete="off">
+      <form onSubmit={this.onSubmit}>
         <div className="flex-grp">
           <div className="group">
             <input
@@ -80,7 +80,6 @@ class SignInFormBase extends Component {
               className="input"
               value={email}
               onChange={this.onChange}
-              autoComplete="nope"
             />
             <label
               className={email !== "" ? "placeholder above" : "placeholder"}
@@ -98,7 +97,6 @@ class SignInFormBase extends Component {
               className="input"
               value={password}
               onChange={this.onChange}
-              autoComplete="new-password"
             />
             <label
               className={password !== "" ? "placeholder above" : "placeholder"}

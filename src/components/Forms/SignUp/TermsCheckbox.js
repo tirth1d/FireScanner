@@ -11,6 +11,7 @@ class TermsCheckbox extends Component {
     };
   }
   checkboxToggleClass() {
+    this.props.toggleInfo();
     let currentState = this.state.active;
     this.setState({ active: !currentState });
   }

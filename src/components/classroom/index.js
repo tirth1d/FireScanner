@@ -145,6 +145,10 @@ class ClassroomSection extends Component {
     this.StudentAttendanceCardMain = React.createRef();
 
     this.StudentAttendanceCardLast = React.createRef();
+
+    this.StudentAttendanceCardPresentList = React.createRef();
+
+    this.StudentAttendanceCardAbsentList = React.createRef();
   }
 
   componentDidMount() {
@@ -501,6 +505,54 @@ class ClassroomSection extends Component {
                     StudentAttendanceCardBtnAddCancel.className =
                       "StudentAttendanceCardBtnAddCancel";
 
+                    this.StudentAttendanceCardPresentList.current.addEventListener(
+                      "click",
+                      () => {
+                        StudentAttendanceCardBtnAddCancel.className =
+                          "StudentAttendanceCardBtnAddCancelHide";
+
+                        this.StudentAttendanceCardLast.current.className =
+                          "AttendeeBaseMainLeaveChoiceBtnDivHide";
+                        this.props.firebase
+                          .studentLengthAttendance(
+                            this.state.fac_college_name,
+                            this.state.facAuthID,
+                            current_facultySub_key,
+                            subStuKey
+                          )
+                          .on("value", (snapshot) => {
+                            if (snapshot.val().attendance === "absent") {
+                              StudentAttendanceCard.className =
+                                "StudentAttendanceCardHide";
+                            }
+                          });
+                      }
+                    );
+
+                    this.StudentAttendanceCardAbsentList.current.addEventListener(
+                      "click",
+                      () => {
+                        StudentAttendanceCardBtnAddCancel.className =
+                          "StudentAttendanceCardBtnAddCancelHide";
+
+                        this.StudentAttendanceCardLast.current.className =
+                          "AttendeeBaseMainLeaveChoiceBtnDivHide";
+                        this.props.firebase
+                          .studentLengthAttendance(
+                            this.state.fac_college_name,
+                            this.state.facAuthID,
+                            current_facultySub_key,
+                            subStuKey
+                          )
+                          .on("value", (snapshot) => {
+                            if (snapshot.val().attendance === "present") {
+                              StudentAttendanceCard.className =
+                                "StudentAttendanceCardHide";
+                            }
+                          });
+                      }
+                    );
+
                     StudentAttendanceCard.appendChild(
                       StudentAttendanceCardInfo
                     );
@@ -639,6 +691,10 @@ class ClassroomSection extends Component {
                   .catch((error) => {
                     console.log(error);
                   });
+
+                alert(
+                  "Please make sure that you do not refresh your page untill you're done taking everyone's attendance, otherwise you'll lose all of your records."
+                );
               } else {
                 alert("Wrong Access Code! Try Again.");
               }
@@ -784,6 +840,7 @@ class ClassroomSection extends Component {
                               "absent"
                             ) {
                               this.currentTime();
+
                               this.props.firebase
                                 .studentLength(
                                   this.state.fac_college_name,
@@ -823,12 +880,10 @@ class ClassroomSection extends Component {
                                   this.setState({ subStuKey: subStuKey });
 
                                   var subStuInfo = snapshot.val();
-                                  // console.log(subStuInfo);
 
                                   var studsCardEnrolNo = subStuInfo.stu_enrolno;
                                   var studsCardName = subStuInfo.stu_name;
-                                  // var removeStudent = "-";
-                                  // console.log(studsCardEnrolNo, studsCardName);
+
                                   var StudentAttendanceCard = document.createElement(
                                     "div"
                                   );
@@ -1096,14 +1151,13 @@ class ClassroomSection extends Component {
           });
 
         window.location.reload(true);
-        this.props.history.push(ROUTES.CLASSROOM);
       }
     }
 
     //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.
   };
 
-  pdfExport = () => {
+  PDFExportPresent = () => {
     if (this.state.authUser.role === "Faculty") {
       if (
         prompt(
@@ -1153,11 +1207,65 @@ class ClassroomSection extends Component {
 
         this.pdfExportComponent.save();
         window.location.reload(true);
-        this.props.history.push(ROUTES.RECORDS);
       }
     }
 
     //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.
+  };
+
+  PDFExportAbsent = () => {
+    if (this.state.authUser.role === "Faculty") {
+      if (
+        prompt(
+          "Enter 'Y' & Press OK to move forward! (Note: You won't be able to record other students' attendance anymore once you go ahead.",
+          "Y"
+        ) === "Y"
+      ) {
+        const { facCardInfoObj } = this.state;
+
+        this.props.firebase
+          .studentLength(
+            this.state.fac_college_name,
+            this.state.facAuthID,
+            facCardInfoObj.current_facultySub_key
+          )
+          .orderByKey()
+          .on("child_added", (snapshot) => {
+            var subStuKey = snapshot.key;
+
+            this.props.firebase
+              .studentLengthAttendance(
+                this.state.fac_college_name,
+                this.state.facAuthID,
+                facCardInfoObj.current_facultySub_key,
+                subStuKey
+              )
+              .on("value", (snapshot) => {
+                var stuAttendance = snapshot.val().attendance;
+                var stuEnNo = snapshot.val().stu_enrolno;
+                var stuName = snapshot.val().stu_name;
+
+                this.props.firebase
+                  .facultySubjects(
+                    this.state.facAuthID,
+                    this.state.fac_college_name
+                  )
+                  .child(
+                    `${facCardInfoObj.current_facultySub_key}/attendees/${this.state.date}/${this.state.randomNumber}`
+                  )
+                  .push({
+                    stuAttendance,
+                    stuEnNo,
+                    stuName,
+                  });
+              });
+          });
+
+        this.pdfExportComponent.save();
+        window.location.reload(true);
+      }
+    }
+    //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.  };
   };
 
   onIDCardClick = () => {
@@ -1215,6 +1323,7 @@ class ClassroomSection extends Component {
         })
         .then(() => {
           this.setState({ scanningCardToggle: false, isToggle: false });
+          alert("You've successfully recorded your attendance!");
         });
     } else {
       this.setState({ barcodeSuccessFailToggle: true });
@@ -1315,6 +1424,11 @@ class ClassroomSection extends Component {
     alert(
       "Send me your feedback on this email address => tirthpatel5885@gmail.com"
     );
+  };
+
+  onClickRecordsLi = () => {
+    this.props.history.push(ROUTES.RECORDS);
+    window.location.reload(true);
   };
 
   render() {
@@ -1580,12 +1694,7 @@ class ClassroomSection extends Component {
                       <li>Profile</li>
                     </Link>
                     {this.state.authUser.role === "Faculty" && (
-                      <Link
-                        to={ROUTES.RECORDS}
-                        style={{ textDecoration: `none` }}
-                      >
-                        <li>Records</li>
-                      </Link>
+                      <li onClick={this.onClickRecordsLi}>Records</li>
                     )}
                     {this.state.authUser.role === "Student" && (
                       <li onClick={this.onIDCardClick}>ID Card</li>
@@ -1772,10 +1881,20 @@ class ClassroomSection extends Component {
                     ref={this.StudentAttendanceCardLast}
                   >
                     <div
-                      className="AttendeeBaseMainDownloadBtn"
-                      onClick={this.pdfExport}
+                      ref={this.StudentAttendanceCardPresentList}
+                      onClick={this.PDFExportPresent}
+                      className="AttendeeBaseMainPresentDownloadBtn"
+                      style={{ fontWeight: `800` }}
                     >
-                      <FontAwesomeIcon icon="download" />
+                      {/* <FontAwesomeIcon icon="download" /> */}P
+                    </div>
+                    <div
+                      ref={this.StudentAttendanceCardAbsentList}
+                      onClick={this.PDFExportAbsent}
+                      className="AttendeeBaseMainAbsentDownloadBtn"
+                      style={{ fontWeight: `800` }}
+                    >
+                      {/* <FontAwesomeIcon icon="download" /> */}A
                     </div>
                     <div
                       className="AttendeeBaseMainAddDBBtn"
