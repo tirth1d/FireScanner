@@ -1,7 +1,5 @@
 Checkout the website on the Live Server : https://firescanner.web.app
 
-The LITE version of this website : https://fireslite.web.app
-
 For Testing purposes : https://firedance.web.app
 
 
