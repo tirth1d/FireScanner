@@ -25,6 +25,15 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 
+    <!--Detect all the window erros-->
+    <script>
+      window.onerror = function (msg, url, line) {
+        console.log("Message : " + msg);
+        console.log("url : " + url);
+        console.log("Line number : " + line);
+      };
+    </script>
+
     <title>FireScanner</title>
   </head>
   <body>
