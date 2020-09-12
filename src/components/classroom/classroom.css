@@ -2,25 +2,27 @@
 .classRoomSectionMain {
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+  overflow: hidden !important;
+  background-color: #fcfcfc;
 }
+
 /*Navigation Bar*/
 .classListNavBar {
   filter: blur(0px);
-  z-index: 1000;
+  z-index: 1000 !important;
   position: absolute;
   top: 0;
   left: 0;
   background-color: #ffffff;
   border-bottom: 1px solid #eeeeee;
-  box-shadow: 0 0px 10px #eeeeee;
+  box-shadow: 0 0px 3px #dfdfdf;
   height: 50px;
-  width: 100vw;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: all 150ms ease-in-out;
 }
+
 .classListNavHeader {
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -29,148 +31,12 @@
   padding: 0;
   margin: 0;
 }
-/* .classListSectionhamburgerNav {
-} */
-
-.classListHamburger {
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 20px;
-  transition: all 250ms ease-in-out;
-  padding: 8px;
-}
-
-.classListHamburgerClose {
-  z-index: 100;
-  position: absolute;
-  top: 2.4%;
-  right: 6%;
-  cursor: pointer;
-  padding: 8px;
-}
-
-.classListHamburgerLineOne,
-.classListHamburgerLineTwo,
-.classListHamburgerLineThree {
-  display: block;
-  background: #454545;
-  height: 0.125em;
-  width: 1.2em;
-  border-radius: 1px;
-  transition: all 0.4s ease;
-}
-
-.classListHamburgerLineOne {
-  transform: translateY(-3px);
-}
-
-.classListHamburgerLineTwo {
-  transform: translateY(0px);
-}
-
-.classListHamburgerLineThree {
-  transform: translateY(3px);
-}
-
-.classListHamburgerOpen .classListHamburgerLineOne,
-.classListHamburgerOpen .classListHamburgerLineTwo,
-.classListHamburgerOpen .classListHamburgerLineThree {
-  background: transparent;
-}
-
-.classListNavBarSlider {
-  height: 100vh;
-  width: 270px;
-  background-color: #ffffff;
-  box-shadow: 0px 0px 10px #9d9d9d;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: scale(0, 1);
-  transform-origin: left;
-  transition: all 100ms ease-in-out;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.classListNavBarSliderSlide {
-  transform: scale(1, 1);
-  transition: all 250ms ease-in-out;
-}
-
-.classListNavBarBanner {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.classListNavBarBannerImg {
-  z-index: 1;
-  position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  margin-top: 70px;
-}
-
-.classListNavBarBannerImg img {
-  height: 100%;
-  width: 100%;
-}
-
-.classListNavBarBannerHeader {
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 15px;
-  padding: 0;
-}
-
-.classListNavBarBannerHeader p {
-  margin: 0;
-  padding: 0;
-}
-
-.classListNavBarNavList {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 40px;
-}
-
-.classListNavBarNavList ul {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  list-style: none;
-}
-
-.classListNavBarNavList ul li {
-  cursor: pointer;
-  padding: 12px 0;
-  border: 1px solid #cccccc;
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  transition: all 250ms ease-in;
-  color: #454545;
-}
-
-.classListNavBarNavList ul li:hover {
-  background-color: #f5f5f5;
-  color: #000000;
-}
 
 .EditBarMain {
-  z-index: 100;
+  z-index: 1000 !important;
   margin: 0;
   padding: 0;
-  width: 100vw;
+  width: 100%;
   position: absolute;
   left: 0;
   top: 100%;
@@ -178,12 +44,27 @@
   display: flex;
   justify-content: space-evenly;
   align-items: center;
+}
+
+.EditBarBgLeft,
+.EditBarBgRight {
+  position: absolute;
+  top: 0;
+  width: 34vw;
+  height: 100%;
   background-color: #4885ed;
+}
+
+.EditBarBgLeft {
+  left: 0;
+}
+
+.EditBarBgRight {
+  right: 0;
 }
 
 .EditBarBgShapeLeft,
 .EditBarBgShapeRight {
-  cursor: pointer;
   width: 28px;
   height: 28px;
   display: flex;
@@ -191,6 +72,8 @@
   align-items: center;
   border-radius: 50px;
   transition: all 250ms ease;
+  border: 1px solid transparent;
+  z-index: 10;
 }
 
 .EditBarBgShapeLeft {
@@ -199,22 +82,23 @@
 .EditBarBgShapeRight {
   margin-right: 20px;
 }
-.EditBarBgShapeRightActive {
+.EditBarBgShapeRightActive,
+.EditBarBgShapeLeftActive {
   border: 1px solid #ffffff;
   background-color: #ffffff;
 }
-.EditBarBgShapeRightActive .editBarDelBtnIcon {
+.EditBarBgShapeRightActive .editBarDelBtnIcon,
+.EditBarBgShapeLeftActive .editBarEditBtnIcon {
   color: #4885ed;
 }
 .EditBarBgShapeMid {
   border: none;
   padding: 0;
   margin: 0;
-  background-color: #ffffff;
+  background-color: transparent !important;
 }
 
 .editBarAddBtn {
-  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -250,29 +134,15 @@
 
 /*Add Classroom Main*/
 .quesCardsMain {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  visibility: hidden;
   position: absolute;
   top: 0;
   left: 0;
-  transform: scale(0);
-  transition: all 50ms ease-in-out;
-}
-.bgBlurCardList {
-  display: none;
-}
-.unscroll {
-  display: block;
-  background-color: transparent;
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  top: 0;
-  left: 0;
+  z-index: 1000;
 }
 
 .visible {
@@ -288,12 +158,31 @@
   display: block;
   border-radius: 10px;
   max-width: 350px;
-  padding: 25px 30px;
+  padding: 25px 30px 25px 30px;
   background-color: #3b75f3;
   text-align: center;
   color: #fff;
   font-size: 21px;
   font-weight: 700;
+}
+
+.quesCardSelectionCard {
+  z-index: 1000;
+  display: block;
+  border-radius: 10px;
+  max-width: 350px;
+  padding: 24px 15px 30px 15px;
+  background-color: #3b75f3;
+  text-align: center;
+  color: #fff;
+  font-size: 21px;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.queCardSelectionOption:hover {
+  background-color: #ffffff;
+  color: #3b75f3;
 }
 
 .hide {
@@ -343,7 +232,7 @@
 .queCardOnebtn,
 .queCardTwobtn,
 .queCardThreebtn {
-  cursor: pointer;
+  /* cursor: pointer; */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -379,33 +268,35 @@
 }
 
 /*Class List Section*/
-
 .classListSection {
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   display: flex;
   justify-content: center;
+  overflow: hidden;
 }
 
-.classCardMainFacStuSection {
+/* .classCardMainFacStuSection {
   filter: blur(0px);
   z-index: 10;
   overflow-x: hidden;
   overflow-y: scroll;
   height: auto;
-  width: 100vw;
-  margin-top: 52px;
-  padding-top: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: all 150ms ease-in-out;
-}
+} */
 
 .blur {
   filter: blur(6px);
-  z-index: -1;
-  transition: all 250ms ease-in-out;
+  z-index: 0;
+  pointer-events: none;
+}
+.unscroll {
+  overflow-y: hidden !important;
 }
 
 /*To hide the scrollbar - Second Technique Hahahahahahahaha*/
@@ -413,63 +304,77 @@
   display: none;
 }
 
-.classCardMain {
+.NoClasses {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #999999;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+
+/* .classCardMain {
   position: relative;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 88vw;
-  height: 110px;
-  margin-top: 20px;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 0px 6px #eceaea;
+  width: calc(100% - 24px);
+  height: auto;
+  margin-top: 12px;
+  border-radius: 3px;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 3px #dddddd;
   text-align: center;
-
-  /* background-color: #efeefd; */
+}
+.classCardMain:first-child {
+  margin-top: 62px;
 }
 
+.classCardMain:last-child {
+  margin-bottom: 10px;
+} */
+
 .classCardMainSideStraps {
+  height: 100%;
+  width: 0;
   position: absolute;
   top: 0;
-  right: 0;
-  height: 100%;
-  width: 0px;
+  left: 0;
+  transform-origin: right;
   background-color: #4885ed;
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   transition: all 150ms ease-in-out;
-  transform-origin: left;
 }
 
 .classCardMainSideStrapsDelete {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0%;
+  left: 0%;
+  transform: translate(-0%, -0%);
   height: 100%;
-  width: 0px;
+  width: 0;
   background-color: #ea3c53;
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
   transition: all 150ms ease-in-out;
-  transform-origin: left;
 }
 
 .strapsSlide {
   cursor: default;
   width: 100%;
-  border-radius: 10px;
-  transition: all 400ms ease-in-out;
-  transform-origin: left;
+  border-radius: 3px;
+  transition: all 250ms ease-in-out;
 }
 
 .strapsSlideDelete {
   cursor: default;
   width: 100%;
-  border-radius: 10px;
-  transition: all 400ms ease-in-out;
-  transform-origin: left;
+  border-radius: 3px;
+  transition: all 250ms ease-in-out;
 }
 
 .classCardMainSideStrapsDeleteBtn {
@@ -477,7 +382,6 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  cursor: pointer;
   visibility: hidden;
   opacity: 0;
   width: 70px;
@@ -492,7 +396,7 @@
 }
 .classCardMainSideStrapsDeleteBtn:hover {
   background-color: #ffffff;
-  transition: all 250ms ease-in-out 0ms;
+  transition: all 200ms ease-in-out 0ms;
   color: #ea3c53;
 }
 
@@ -501,13 +405,12 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  cursor: pointer;
   visibility: hidden;
   opacity: 0;
   width: 210px;
   height: 35px;
   border: none;
-  border-radius: 8px;
+  border-radius: 3px;
   background-color: #fff;
   font-size: 14px;
   display: flex;
@@ -517,7 +420,7 @@
 .classCardMainSideStrapsGenerateBtnRandom {
   width: 160px;
   height: 40px;
-  position: relative;
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -526,8 +429,7 @@
   border: none;
   border-radius: 8px;
   display: flex;
-  flex-direction: row-reverse;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   background-color: #ffffff;
   font-size: 18px;
@@ -535,7 +437,7 @@
 .showStrapsBtn {
   visibility: visible;
   opacity: 1;
-  transition: all 250ms ease-in-out 300ms;
+  transition: all 200ms ease-in-out 200ms;
 }
 
 .hideStrapsBtn {
@@ -546,7 +448,7 @@
 
 .classCardMainSideStrapsGenerateBtnRandomAgain,
 .classCardMainSideStrapsGenerateBtnRandomNext {
-  cursor: pointer;
+  cursor: default;
   width: 35px;
   height: 25px;
   border-radius: 5px;
@@ -554,10 +456,7 @@
 
 .classCardMainSideStrapsGenerateBtnRandomNext {
   height: 84%;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 2.3%;
+  margin-right: 2.3%;
   background-color: #ea3c53;
   display: flex;
   justify-content: center;
@@ -566,10 +465,7 @@
 
 .classCardMainSideStrapsGenerateBtnRandomAgain {
   height: 84%;
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 2.3%;
+  margin-left: 2.3%;
   background-color: #3b75f3;
   display: flex;
   justify-content: center;
@@ -580,30 +476,53 @@
 .classCardMainSideStrapsGenerateBtnRandomNextIcon {
   color: #fff;
   font-weight: 700;
+  cursor: default !important;
+}
+
+.classCardMainSideStrapsGenerateBtnRandom p:nth-child(2) {
+  margin: 0;
+  padding: 0;
+}
+
+.classCardMainInfoDiv {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.classCardMainInfoSubParagraph,
+.classCardMainInfoDeptParagraph,
+.classCardMainInfoSDShiftParagraph,
+.classCardMainInfoFacNameParagraph {
+  margin: 0;
+  padding: 0;
+  word-break: break-all;
+  word-wrap: break-word;
 }
 
 .classCardMainInfoSubParagraph {
-  margin: 0;
-  padding: 0;
+  margin: 14px auto 9px auto !important;
+  width: 78%;
 }
 
 .classCardMainInfoDeptParagraph {
-  text-transform: lowercase;
+  text-transform: capitalize;
+  width: 80%;
   font-size: 15px;
-  margin: 0;
-  padding: 0;
-  margin-top: 9px;
-}
-
-.classCardMainInfoDeptParagraph::first-letter {
-  text-transform: uppercase;
+  margin: 0 auto !important;
 }
 
 .classCardMainInfoSDShiftParagraph {
+  width: 80%;
   font-size: 15px;
-  margin: 0;
-  padding: 0;
-  margin-top: 9px;
+  margin: 10px auto 16px auto !important;
+}
+
+.classCardMainInfoFacNameParagraph {
+  width: 80%;
+  font-size: 15px;
+  margin: 12px auto 16px auto !important;
 }
 
 @media screen and (min-width: 550px) {
@@ -616,12 +535,11 @@
     top: 50%;
     transform: translate(-50%, -50%);
     height: 90vh;
-    width: unset;
+    width: 380px;
   }
 
-  .classListSection,
   .quesCardsMain {
-    height: 100%;
+    height: 90vh;
   }
 
   .classListNavBarSlider {
@@ -635,16 +553,20 @@
   .classListNavBar,
   .bgBlurCardList,
   .quesCardsMain {
-    width: 380px;
+    width: 100%;
   }
 
   .classListNavBar {
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
-    position: fixed;
   }
 
   .classCardMain {
-    width: 340px;
+    width: 340px !important;
+  }
+
+  .EditBarBgLeft,
+  .EditBarBgRight {
+    width: 130px;
   }
 }

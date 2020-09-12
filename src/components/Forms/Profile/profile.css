@@ -1,3 +1,18 @@
+.profileHamburger {
+  width: 66px;
+  height: 62px;
+  background-color: #ffffff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid #f0f0f0;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 100%;
+  z-index: 10000;
+  box-shadow: 0px 0px 10px #f0f0f0;
+}
+
 .input::-webkit-scrollbar {
   /*To make Scrollbar invisible*/
   height: 0;
@@ -7,6 +22,8 @@
 
 .inputProfile {
   font-size: 14px;
+  white-space: nowrap;
+  overflow-y: hidden;
 }
 
 .placeholderProfile {
@@ -29,21 +46,21 @@
   filter: blur(6px);
 }
 
-form {
-  padding-bottom: 14px;
-  margin-bottom: 60px;
+.profileForm {
+  padding-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .editFontawesomeBtn,
 .deleteFontawesomeBtn,
 .signOutFontawesomeBtn {
+  cursor: default !important;
   height: 40px;
   width: 40px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
   border: none;
   color: #fff;
   font-size: 15px;
@@ -61,6 +78,7 @@ form {
   left: 50%;
   transform: translateX(-50%);
 }
+
 .editFontawesomeBtn {
   margin-right: 10px;
   background-color: #576ef1;
@@ -129,7 +147,6 @@ form {
 }
 
 .deleteConfirmationBoxBtn {
-  cursor: pointer;
   display: flex;
   margin-top: 25px;
 }
@@ -157,6 +174,16 @@ form {
   font-weight: 600;
 }
 
+@media screen and (max-width: 950px) {
+  .grp-last {
+    margin-bottom: 30px !important;
+  }
+  .profileForm {
+    padding-bottom: 0px;
+    margin-bottom: 80px;
+  }
+}
+
 @media screen and (max-width: 370px) {
   .deleteConfirmationBox {
     width: 300px;
@@ -181,5 +208,12 @@ form {
   .editBtn {
     margin-left: 0px;
     margin-top: 6px;
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .profileForm {
+    padding-bottom: 10px;
+    margin-bottom: 80px;
   }
 }

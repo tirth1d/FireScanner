@@ -3,8 +3,16 @@ label {
 }
 
 .error-text {
+  width: 400px;
   font-size: 15px;
-  margin-bottom: 20px;
+  margin-top: 0px;
+  padding-bottom: 22px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.error-text-login {
+  margin-top: -20px;
 }
 
 .StuSignupForm,
@@ -27,10 +35,10 @@ form {
   border-radius: 20px;
   background-color: white;
   display: inline-block;
-  padding: 26px 36px;
-  padding-bottom: 20px;
+  padding: 26px 36px 0px 26px;
   border: 2px solid #f0f0f0;
   text-align: center;
+  margin-bottom: 50px;
 }
 
 .input,
@@ -55,7 +63,6 @@ form {
 
 .placeholder,
 .dropdown-placeholder {
-  cursor: auto;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -64,24 +71,39 @@ form {
   transition: all 200ms ease-in-out;
   text-align: center;
   font-size: 14px;
+  pointer-events: none !important;
 }
 
-.input:focus + .placeholder {
+input:focus + .placeholder {
   background-color: #ffffff;
   padding-left: 6px;
   padding-right: 6px;
-  top: -5%;
+  top: -0%;
 }
+
 .above {
-  top: -5%;
+  top: -0%;
   background-color: #ffffff;
   padding-left: 6px;
   padding-right: 6px;
-  top: -5%;
 }
 .dropdown-group {
-  cursor: pointer;
   transition: all 200ms ease-in-out;
+}
+
+input:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+}
+
+/* Change autocomplete styles in WebKit */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: unset;
+  -webkit-box-shadow: unset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .dropdown-group:hover > .dropdown-placeholder {
@@ -93,7 +115,6 @@ form {
   margin-left: 50%;
   width: 120px;
   padding: 4.5px 10px;
-  cursor: pointer;
   visibility: hidden;
   border: 2px solid #e1e1e1;
   border-radius: 5px;
@@ -108,7 +129,6 @@ form {
   bottom: -17px;
   left: 50%;
   transform: translateX(-50%);
-  cursor: pointer;
   border: none;
   padding: 8px 30px;
   border-radius: 6px;
@@ -135,15 +155,14 @@ form {
 }
 
 .group-checkbox {
-  margin-top: 18px;
+  margin-top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 0px;
+  margin-bottom: 14px;
 }
 .group-checkbox div:first-child {
   margin-right: 8px;
-  cursor: pointer;
   height: 10px;
   width: 10px;
   border-radius: 2px;
@@ -175,7 +194,7 @@ form {
 }
 
 .group-checkbox label span {
-  cursor: pointer;
+  cursor: default;
   color: #0078ff;
 }
 
@@ -212,16 +231,24 @@ form {
   margin-left: 8px;
 }
 
-.group-checkbox {
-  margin-top: 10px;
-  margin-bottom: 30px;
+.SpinnerDesktop {
+  margin-bottom: 24px;
+  margin-top: -15px;
 }
 
 @media screen and (max-width: 950px) {
+  .error-text {
+    width: auto;
+    margin-top: 0px;
+    padding-bottom: 10px;
+  }
+  .error-text-login {
+    margin-top: unset;
+  }
   form {
     width: 400px;
     padding-top: 15px;
-    padding-bottom: 30px;
+    padding-bottom: 14px;
   }
   .flex-grp {
     display: unset;
@@ -253,11 +280,23 @@ form {
 
   .group-checkbox {
     margin-top: 10px;
-    margin-bottom: 0px;
+    margin-bottom: 12px;
+  }
+  .SpinnerDesktop {
+    margin-bottom: 10px;
+    margin-top: unset;
   }
 }
 
 @media screen and (max-width: 700px) {
+  .error-text {
+    width: auto;
+    margin: 0;
+    padding-bottom: 16px;
+  }
+  .error-text-login {
+    margin-top: unset;
+  }
   form {
     font-size: 14px;
     display: flex;
@@ -266,7 +305,7 @@ form {
     margin-top: 20px;
     width: 70vw;
     padding-top: 15px;
-    padding-bottom: 26px !important;
+    padding-bottom: 14px;
     padding-left: 26px;
     font-size: 14px !important;
     padding-right: 26px;
@@ -313,6 +352,11 @@ form {
 
   .group-checkbox {
     margin-top: 10px;
-    margin-bottom: 0px;
+    margin-bottom: 8px;
+  }
+
+  .SpinnerDesktop {
+    margin-bottom: 10px;
+    margin-top: unset;
   }
 }

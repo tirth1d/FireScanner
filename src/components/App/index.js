@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import SignIn from "../Forms/SignIn";
 import SignUpStu from "../Forms/SignUp/SignUpStu";
 import SignUpFac from "../Forms/SignUp/SignUpFac";
@@ -7,7 +7,7 @@ import PasswordUpdate from "../Forms/PasswordUpdate";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import * as ROUTES from "../../constants/routes";
 import Landing from "../Landing";
-import HomePage from "../Home";
+import Analytics from "../Analytics";
 import Destination from "../DestinationPage";
 import { withAuthentication } from "../Session";
 
@@ -28,7 +28,9 @@ import {
 
 import ProfilePage from "../Forms/Profile";
 import Classroom from "../classroom";
-import Records from "../records";
+import IdCard from "../IdCard";
+import Spinner from "../spinner";
+import SubList from "../subjectList";
 
 library.add(
   faArrowRight,
@@ -43,24 +45,32 @@ library.add(
   faPrint
 );
 
-const App = () => (
-  <Router>
-    <div className="App">
-      <Switch>
-        <Route path={ROUTES.DESTINATION} exact component={Destination} />
-        <Route path={ROUTES.LANDING} component={Landing} />
-        <Route path={ROUTES.HOME} component={HomePage} />
-        <Route path={ROUTES.SIGN_IN} component={SignIn} />
-        <Route path={ROUTES.STU_SIGN_UP} component={SignUpStu} />
-        <Route path={ROUTES.FAC_SIGN_UP} component={SignUpFac} />
-        <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForget} />
-        <Route path={ROUTES.PASSWORD_UPDATE} component={PasswordUpdate} />
-        <Route path={ROUTES.PROFILE} component={ProfilePage} />
-        <Route path={ROUTES.CLASSROOM} component={Classroom} />
-        <Route path={ROUTES.RECORDS} component={Records} />
-      </Switch>
-    </div>
-  </Router>
-);
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div className="App">
+          <Switch>
+            <Route path={ROUTES.DESTINATION} exact component={Destination} />
+            <Route path={ROUTES.LANDING} component={Landing} />
+            <Route path={ROUTES.SIGN_IN} component={SignIn} />
+            <Route path={ROUTES.STU_SIGN_UP} component={SignUpStu} />
+            <Route path={ROUTES.FAC_SIGN_UP} component={SignUpFac} />
+            <Route path={ROUTES.PASSWORD_FORGET} component={PasswordForget} />
+            <Route path={ROUTES.PASSWORD_UPDATE} component={PasswordUpdate} />
+            <Route path={ROUTES.PROFILE} component={ProfilePage} />
+            <Route path={ROUTES.CLASSROOM} component={Classroom} />
+            <Route path={ROUTES.ANALYTICS} component={Analytics} />
+            <Route path={ROUTES.IDCARD} component={IdCard} />
+            <Route path={ROUTES.SPINNER} component={Spinner} />
+            <Route path={ROUTES.SUBLIST} component={SubList} />
+
+            <Route path="*" component={Destination} />
+          </Switch>
+        </div>
+      </Router>
+    );
+  }
+}
 
 export default withAuthentication(App);

@@ -3,7 +3,7 @@ import Banner from "../FormBanner";
 import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 import AuthUserContext from "../../Session/context";
-import Home from "../../Home";
+import Classroom from "../../classroom";
 
 import "../index.css";
 
@@ -12,11 +12,13 @@ import StuLoginBanner from "../../../images/loginbanner.png";
 import { withFirebase } from "../../Configuration";
 import * as ROUTES from "../../../constants/routes";
 
+import Spinner from "../../spinner";
+
 const condition = (authUser) => !!authUser;
 
 const LoginPageCondition = () => (
   <AuthUserContext.Consumer>
-    {(authUser) => (condition(authUser) ? <Home /> : <SignInPage />)}
+    {(authUser) => (condition(authUser) ? <Classroom /> : <SignInPage />)}
   </AuthUserContext.Consumer>
 );
 
@@ -44,10 +46,11 @@ class SignInFormBase extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { ...INITIAL_STATE };
+    this.state = { ...INITIAL_STATE, isToggleSpinner: false };
   }
 
   onSubmit = (event) => {
+    this.setState({ error: null, isToggleSpinner: true });
     event.preventDefault();
 
     const { email, password } = this.state;
@@ -56,10 +59,10 @@ class SignInFormBase extends Component {
       .doSignInWithEmailAndPassword(email, password)
       .then(() => {
         this.setState({ ...INITIAL_STATE });
-        this.props.history.push(ROUTES.HOME);
+        this.props.history.push(ROUTES.CLASSROOM);
       })
       .catch((error) => {
-        this.setState({ error: error.message });
+        this.setState({ isToggleSpinner: false, error: error.message });
       });
   };
 
@@ -80,6 +83,7 @@ class SignInFormBase extends Component {
               className="input"
               value={email}
               onChange={this.onChange}
+              required
             />
             <label
               className={email !== "" ? "placeholder above" : "placeholder"}
@@ -97,6 +101,7 @@ class SignInFormBase extends Component {
               className="input"
               value={password}
               onChange={this.onChange}
+              required
             />
             <label
               className={password !== "" ? "placeholder above" : "placeholder"}
@@ -110,24 +115,41 @@ class SignInFormBase extends Component {
         <button type="submit" className="SubmitBut">
           Log In
         </button>
+        {this.state.isToggleSpinner &&
+        error === null &&
+        email !== "" &&
+        password !== "" ? (
+          <div className="SpinnerDesktop">
+            <Spinner />
+          </div>
+        ) : null}
 
-        <div className="error-text">
-          {error && <p style={{ color: `#ff0000` }}>*{error}*</p>}
-        </div>
+        {!this.state.isToggleSpinner && (
+          <div
+            className={
+              error !== null ? "error-text-login error-text" : "error-text"
+            }
+          >
+            {error !== null ? (
+              <p style={{ color: `#ff0000` }}>*{error}*</p>
+            ) : null}
+          </div>
+        )}
       </form>
     );
   }
 }
 
 const SignUpLink = () => (
-  <p style={{ textAlign: `center`, marginTop: `50px` }}>
-    Don't have an account?{" "}
+  <p style={{ textAlign: `center`, marginTop: `50px`, cursor: `default` }}>
+    Don't have an account?
     <Link
       style={{
         textDecoration: `none`,
         color: `#0000ff`,
         fontWeight: `500`,
         marginLeft: `5px`,
+        cursor: `default`,
       }}
       to={ROUTES.LANDING}
     >
@@ -136,13 +158,21 @@ const SignUpLink = () => (
   </p>
 );
 const PasswordForgetLink = () => (
-  <p style={{ textAlign: `center`, margin: `0px`, padding: `0px` }}>
+  <p
+    style={{
+      textAlign: `center`,
+      margin: `0px`,
+      padding: `0px`,
+      cursor: `default`,
+    }}
+  >
     <Link
       style={{
         textDecoration: `none`,
         color: `#0000ff`,
         fontWeight: `500`,
         paddingLeft: `5px`,
+        cursor: `default`,
       }}
       to={ROUTES.PASSWORD_FORGET}
     >

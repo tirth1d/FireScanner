@@ -5,6 +5,7 @@ import { withFirebase } from "../../Configuration";
 import * as ROUTES from "../../../constants/routes";
 import Banner from "../FormBanner";
 import StuSignUpBanner from "../../../images/stud_banner.png";
+import Spinner from "../../spinner";
 
 const PasswordForgetPage = () => (
   <div>
@@ -20,7 +21,8 @@ const PasswordForgetPage = () => (
 
 const INITIAL_STATE = {
   email: "",
-  error: null,
+  error: "",
+  isSpinnerHide: true,
 };
 
 class PasswordForgetFormBase extends Component {
@@ -31,16 +33,16 @@ class PasswordForgetFormBase extends Component {
   }
 
   onSubmit = (event) => {
+    this.setState({ error: "", isSpinnerHide: false });
     const { email } = this.state;
 
     this.props.firebase
       .doPasswordReset(email)
       .then(() => {
-        this.setState({ ...INITIAL_STATE });
-        console.log("Email Sent!!");
+        this.setState({ ...INITIAL_STATE, error: "Email Sent!" });
       })
       .catch((error) => {
-        this.setState({ error });
+        this.setState({ error: error.message });
       });
 
     event.preventDefault();
@@ -51,7 +53,7 @@ class PasswordForgetFormBase extends Component {
   };
 
   render() {
-    const { email, error } = this.state;
+    const { email, error, isSpinnerHide } = this.state;
 
     const isInvalid = email === "";
 
@@ -60,6 +62,7 @@ class PasswordForgetFormBase extends Component {
         <div className="flex-group">
           <div className="group">
             <input
+              required={true}
               className="input"
               name="email"
               value={this.state.email}
@@ -79,7 +82,24 @@ class PasswordForgetFormBase extends Component {
           Reset
         </button>
 
-        {error && <p>{error.message}</p>}
+        {error !== "" ? (
+          <div
+            className="error-text"
+            style={{ marginBottom: `-28px`, marginTop: `-10px` }}
+          >
+            <p
+              style={
+                error === "Email Sent!"
+                  ? { color: `green` }
+                  : { color: `#ff0000` }
+              }
+            >
+              {error === "Email Sent!" ? error : "*" + error + "*"}
+            </p>
+          </div>
+        ) : null}
+
+        {error === "" && !isSpinnerHide ? <Spinner /> : null}
       </form>
     );
   }

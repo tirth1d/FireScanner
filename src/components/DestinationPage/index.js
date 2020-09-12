@@ -1,5 +1,5 @@
 import React from "react";
-import Home from "../Home";
+import Classroom from "../classroom";
 import Landing from "../Landing";
 import { AuthUserContext } from "../Session";
 
@@ -9,7 +9,7 @@ const Destination = () => (
   </AuthUserContext.Consumer>
 );
 
-const NavigationAuth = () => <Home />;
+const NavigationAuth = () => <Classroom />;
 
 const NavigationNonAuth = () => <Landing />;
 

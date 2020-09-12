@@ -1,29 +1,35 @@
 import React, { Component } from "react";
+import { IonAlert } from "@ionic/react";
+import SubjectList from "../subjectList";
+
 import "./classroom.css";
 import CollegeJSON from "../../CollegeList.json";
 
-import { Link, withRouter } from "react-router-dom";
-import * as ROUTES from "../../constants/routes";
+import { withRouter } from "react-router-dom";
 
 import { compose } from "recompose";
 import { withFirebase } from "../Configuration";
+import { withEmailVerification } from "../Session";
 
 import AuthUserContext from "../Session/context";
-import SignInPage from "../Forms/SignIn";
+import Spinner from "../spinner";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import FacultyImg from "../../images/faculty.png";
 import SomethingWrongGIF from "../../images/something_wrong.gif";
+import Menu from "../menu";
 
 import Scanner from "./scanner";
 import Result from "./result";
 
-import ReactDOMServer from "react-dom/server";
+import ReactDOMServer, { renderToStaticMarkup } from "react-dom/server";
 
-import { PDFExport } from "@progress/kendo-react-pdf";
+import Quagga from "quagga";
+
+import SelectionCard from "./selectionCard";
 
 import "./attendees.css";
+import "./studentslist.css";
 const condition = (authUser) => !!authUser;
 
 class Classroom extends Component {
@@ -31,14 +37,35 @@ class Classroom extends Component {
     return (
       <AuthUserContext.Consumer>
         {(authUser) =>
-          condition(authUser) ? <ClassroomSectionMain /> : <SignInPage />
+          condition(authUser) ? <ClassroomSectionMain /> : <SpinnerComponent />
         }
       </AuthUserContext.Consumer>
     );
   }
 }
 
-const INITIAL_STATE = {
+class SpinnerComponent extends Component {
+  render() {
+    return (
+      <div
+        style={{
+          position: `fixed`,
+          top: `0`,
+          left: `0`,
+          height: `100%`,
+          width: `100%`,
+          display: `flex`,
+          justifyContent: `center`,
+          alignItems: `center`,
+        }}
+      >
+        <Spinner size="40px" />
+      </div>
+    );
+  }
+}
+
+const INITIAL_STATE_ADD_CLASS_INPUTS = {
   department: "",
   subject: "",
   semester: "",
@@ -46,25 +73,94 @@ const INITIAL_STATE = {
   shift: "",
 };
 
+const INITIAL_STATE_CLASSROOM_SECTION = {
+  isToggle: false,
+  addBlur: false,
+  addNavBlur: false,
+  isToggleHamburger: false,
+  isHide: false,
+  isHideLast: 0,
+  onCardClickToggle: false,
+  selectionCardToggle: true,
+  queCardSelectionOptions: "",
+
+  facCardInfoObj: {},
+  facKey: "",
+  subStuKey: "",
+  stuCardInfoObj: {},
+
+  randomNumber: 0,
+  fac_access: false,
+  resultBarcode: 0,
+  scanningCardToggle: false,
+
+  barcodeSuccessFailToggle: false,
+  onScanAlternativeToggle: false,
+
+  alt_enrolment_no: "",
+
+  stuAttendanceInfoFirebaseFacName: "",
+  stuAttendanceInfoFirebaseStuSubject: "",
+  stuAttendanceInfoFirebaseCardDeptInfo: "",
+
+  stuLength: "",
+  liveSubStuLength: "",
+
+  StudentAttendanceCardInfoToggle: false,
+
+  classCardMainSideStrapsDeleteToggle: false,
+
+  classCardMainAddStudentsToggle: false,
+
+  StudentAttendanceCheckAgain: "",
+  StudentAttendanceCheckToggle: false,
+  addStudents: false,
+
+  childElementCount: 0,
+
+  showAlertExit: false,
+  showAlertAddDb: false,
+  showAlertPresent: false,
+  showAlertAbsent: false,
+  showAlertAccessCode: false,
+  showAlertWrong: false,
+  showAlertWarning: false,
+  showAlertDelete: false,
+
+  unClickable: false,
+  isSpinnerHide: true,
+  NoClassesHide: true,
+
+  studentList: [],
+  currentSubName: null,
+};
+
+var xDown = null;
+var yDown = null;
+
 class ClassroomSection extends Component {
   constructor(props) {
     super(props);
 
-    var today = new Date(),
-      date =
-        today.getDate() +
-        "-" +
-        (today.getMonth() + 1) +
-        "-" +
-        today.getFullYear();
+    this._isMounted = false;
 
-    var todayStyle = new Date(),
-      dateStyle =
-        todayStyle.getDate() +
-        "." +
-        (todayStyle.getMonth() + 1) +
-        "." +
-        todayStyle.getFullYear();
+    this.addStudentsCardStudentInfoEnNo = [];
+    this.addStudentsCardStudentInfoName = [];
+
+    var today = new Date();
+    var dateFirebase =
+      (today.getDate() < 10 ? "0" + today.getDate() : today.getDate()) +
+      (today.getMonth() + 1 < 10
+        ? "0" + (today.getMonth() + 1)
+        : today.getMonth() + 1) +
+      today.getFullYear();
+
+    var dateStyle =
+      today.getDate() +
+      "." +
+      (today.getMonth() + 1) +
+      "." +
+      today.getFullYear();
 
     var weekday = new Array(7);
     weekday[0] = "Sunday";
@@ -74,30 +170,24 @@ class ClassroomSection extends Component {
     weekday[4] = "Thursday";
     weekday[5] = "Friday";
     weekday[6] = "Saturday";
-
     this.state = {
-      ...INITIAL_STATE,
-      authUser: JSON.parse(localStorage.getItem("authUser")),
-      isToggle: false,
-      isToggleHamburger: false,
-      isHide: false,
-      isHideLast: 0,
-      onCardClickToggle: false,
+      ...INITIAL_STATE_ADD_CLASS_INPUTS,
+      ...INITIAL_STATE_CLASSROOM_SECTION,
 
+      dateFirebase: dateFirebase,
+      dateStyle: dateStyle,
+      time: "",
+      weekdayName: weekday[today.getDay()],
+
+      authUser: JSON.parse(localStorage.getItem("authUser")),
       fac_name: JSON.parse(localStorage.getItem("authUser")).name,
       fac_college_name: JSON.parse(localStorage.getItem("authUser")).college,
       fac_access_code: JSON.parse(localStorage.getItem("authUser")).access_code,
-      facCardInfoObj: {},
       facAuthID: JSON.parse(localStorage.getItem("authUser")).uid,
-      facKey: "",
-      subStuKey: "",
-      stuCardInfoObj: {},
-
       course_list: CollegeJSON.find(
         (college) =>
           college.name === JSON.parse(localStorage.getItem("authUser")).college
       ).courses,
-
       stu_college_name: JSON.parse(localStorage.getItem("authUser")).college,
       stu_dept: JSON.parse(localStorage.getItem("authUser")).department,
       stu_sem: JSON.parse(localStorage.getItem("authUser")).semester,
@@ -106,38 +196,7 @@ class ClassroomSection extends Component {
       stu_enrolno: JSON.parse(localStorage.getItem("authUser")).enrolment_no,
       stu_uid: JSON.parse(localStorage.getItem("authUser")).uid,
       stu_name: JSON.parse(localStorage.getItem("authUser")).name,
-
-      randomNumber: 0,
-      fac_access: false,
-      resultBarcode: 0,
-      scanningCardToggle: false,
-
       profile_name: JSON.parse(localStorage.getItem("authUser")).name,
-
-      barcodeSuccessFailToggle: false,
-      onScanAlternativeToggle: false,
-
-      alt_enrolment_no: "",
-
-      stuAttendanceInfoFirebaseFacName: "",
-      stuAttendanceInfoFirebaseStuSubject: "",
-      stuAttendanceInfoFirebaseCardDeptInfo: "",
-      date: date,
-      dateStyle: dateStyle,
-      time: "",
-      weekdayName: weekday[todayStyle.getDay()],
-
-      stuLength: "",
-      liveSubStuLength: "",
-
-      StudentAttendanceCardInfoToggle: false,
-
-      classCardMainSideStrapsDeleteToggle: false,
-
-      StudentAttendanceCheckAgain: "",
-      StudentAttendanceCheckToggle: false,
-
-      StudentAttendanceCardInfo: false,
     };
 
     this.classCardMainFacStuSection = React.createRef();
@@ -146,287 +205,87 @@ class ClassroomSection extends Component {
 
     this.StudentAttendanceCardLast = React.createRef();
 
-    this.StudentAttendanceCardPresentList = React.createRef();
+    this.addStudents = React.createRef();
 
-    this.StudentAttendanceCardAbsentList = React.createRef();
+    this.addAllStudents = React.createRef();
+
+    this.removeAllStudents = React.createRef();
   }
 
   componentDidMount() {
-    const {
-      stu_college_name,
-      stu_dept,
-      stu_sem,
-      stu_div,
-      stu_shift,
-    } = this.state;
+    this._isMounted = true;
+
+    try {
+      this.props.firebase.db.goOnline();
+    } catch (error) {
+      console.log(error);
+    }
+
+    this.setState({ NoClassesHide: true });
+
     if (this.state.authUser.role === "Faculty") {
       this.setState({ StudentAttendanceCheckToggle: false });
+    } else if (this.state.authUser.role === "Student") {
+      if (this._isMounted) {
+        this.props.firebase.userAuthorization(this.state.authUser.uid).update({
+          emailVerified: true,
+        });
+      }
 
-      this.props.firebase
-        .facultySubjects(this.state.facAuthID, this.state.fac_college_name)
-        .orderByKey()
-        .on("child_added", (snapshot) => {
-          var subject = snapshot.child("subject").val();
-          var current_facultySub_key = snapshot.key;
-          var department = snapshot.child("department").val();
-          var semester = snapshot.child("semester").val();
-          var division = snapshot.child("division").val();
-          var shift = snapshot.child("shift").val();
-          if (shift === `No Shift (Has only one Shift)`) {
-            shift = "No Shift";
-          } else {
-            shift = snapshot.child("shift").val();
-          }
+      this.setState({ StudentAttendanceCheckToggle: false });
 
-          this.setState({
-            facCardInfoObj: {
-              subject,
-              current_facultySub_key,
-              department,
-              semester,
-              division,
-              shift,
-            },
-          });
+      this._onConfirm = () => {
+        if (
+          (this.state.resultBarcode.length === 12 ||
+            this.state.alt_enrolment_no.length === 12) &&
+          (this.state.resultBarcode === this.state.stu_enrolno ||
+            this.state.alt_enrolment_no === this.state.stu_enrolno)
+        ) {
+          const { stuCardInfoObj } = this.state;
 
           this.props.firebase
-            .studentList(this.state.fac_college_name)
-            .orderByKey()
-            .on("child_added", (snapshot) => {
-              var studentList = snapshot.val();
-              var studentListKey = snapshot.key;
-              if (
-                studentList.department === department &&
-                studentList.division === division &&
-                studentList.semester === semester &&
-                (studentList.shift === "No Shift (Has only one Shift)" || shift)
-              ) {
-                this.props.firebase
-                  .facultySubjects(
-                    this.state.facAuthID,
-                    this.state.fac_college_name
-                  )
-                  .child(`${current_facultySub_key}/students/${studentListKey}`)
-                  .set({
-                    stu_enrolno: studentList.enrolment_no,
-                    stu_name: studentList.name,
-                    attendance: "absent",
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                  });
-              }
+            .studentLengthAttendance(
+              this.state.fac_college_name,
+              stuCardInfoObj.FacKey,
+              stuCardInfoObj.SubFacKey,
+              this.state.stu_uid
+            )
+            .update({
+              attendance: "present",
+            })
+            .then(() => {
+              this.setState({
+                StudentAttendanceCheckToggle: true,
+                scanningCardToggle: false,
+                isToggle: false,
+              });
+            })
+            .then(() => {
+              this.currentTime();
 
               this.props.firebase
-                .facultySubjects(
-                  this.state.facAuthID,
-                  this.state.fac_college_name
+                .studentLength(
+                  this.state.fac_college_name,
+                  stuCardInfoObj.FacKey,
+                  stuCardInfoObj.SubFacKey
                 )
-                .child(`${current_facultySub_key}/random_access`)
-                .update({
-                  access_boolean: false,
-                  random_number: 0,
-                })
-                .catch((error) => {
-                  console.log(error);
+                .orderByKey()
+                .once("value", (snapshot) => {
+                  if (this._isMounted) {
+                    var subStuLength = snapshot.numChildren();
+                    this.setState({ stuLength: subStuLength });
+                  }
                 });
-            });
 
-          let randomNumberEquation;
-
-          var classCardMainFacSection = document.createElement("div");
-          var classCardMain = document.createElement("div");
-          var classCardMainSideStraps = document.createElement("div");
-          var classCardMainSideStrapsDelete = document.createElement("div");
-          var classCardMainInfo = document.createElement("div");
-          var classCardMainInfoSub = document.createElement("h3");
-          var classCardMainInfoDept = document.createElement("p");
-          var classCardMainInfoSDShift = document.createElement("p");
-          var classCardMainInfoSem = document.createElement("span");
-          var classCardMainInfoDiv = document.createElement("span");
-          var classCardMainInfoShift = document.createElement("span");
-
-          var classCardMainSideStrapsDeleteBtn = document.createElement("div");
-          const classCardMainSideStrapsDeleteBtnIcon = ReactDOMServer.renderToStaticMarkup(
-            <FontAwesomeIcon
-              icon="trash-alt"
-              style={{
-                fontSize: `20px`,
-              }}
-            />
-          );
-
-          var classCardMainSideStrapsGenerateBtn = document.createElement(
-            "div"
-          );
-          var classCardMainSideStrapsGenerateBtnRandom = document.createElement(
-            "div"
-          );
-          var classCardMainSideStrapsGenerateBtnRandomNumber = document.createElement(
-            "p"
-          );
-          var classCardMainSideStrapsGenerateBtnRandomAgain = document.createElement(
-            "div"
-          );
-          var classCardMainSideStrapsGenerateBtnRandomNext = document.createElement(
-            "div"
-          );
-          var classCardMainSideStrapsGenerateBtnRandomAgainIcon = document.createElement(
-            "p"
-          );
-          var classCardMainSideStrapsGenerateBtnRandomNextIcon = document.createElement(
-            "p"
-          );
-
-          const classCardMainSideStrapsGenerateBtnRandomAgainFontAwesomeIcon = ReactDOMServer.renderToStaticMarkup(
-            <FontAwesomeIcon
-              icon="undo"
-              style={{ color: `#ffffff`, fontSize: `15px` }}
-            />
-          );
-
-          const classCardMainSideStrapsGenerateBtnRandomNextFontAwesomeIcon = ReactDOMServer.renderToStaticMarkup(
-            <FontAwesomeIcon
-              icon="arrow-right"
-              style={{ color: `#ffffff`, fontSize: `16px` }}
-            />
-          );
-
-          classCardMainSideStrapsDelete.appendChild(
-            classCardMainSideStrapsDeleteBtn
-          );
-          classCardMainSideStrapsDeleteBtn.innerHTML = classCardMainSideStrapsDeleteBtnIcon;
-          classCardMainSideStrapsGenerateBtnRandom.appendChild(
-            classCardMainSideStrapsGenerateBtnRandomNumber
-          );
-
-          classCardMainSideStrapsGenerateBtnRandomNext.appendChild(
-            classCardMainSideStrapsGenerateBtnRandomNextIcon
-          );
-          classCardMainSideStrapsGenerateBtnRandomNextIcon.className =
-            "classCardMainSideStrapsGenerateBtnRandomNextIcon";
-          classCardMainSideStrapsGenerateBtnRandomNextIcon.innerHTML = classCardMainSideStrapsGenerateBtnRandomNextFontAwesomeIcon;
-
-          classCardMainSideStrapsGenerateBtnRandomAgain.appendChild(
-            classCardMainSideStrapsGenerateBtnRandomAgainIcon
-          );
-          classCardMainSideStrapsGenerateBtnRandomAgainIcon.className =
-            "classCardMainSideStrapsGenerateBtnRandomAgainIcon";
-          classCardMainSideStrapsGenerateBtnRandomAgainIcon.innerHTML = classCardMainSideStrapsGenerateBtnRandomAgainFontAwesomeIcon;
-
-          classCardMainFacSection.className = "classCardMainFacSection";
-          classCardMain.className = "classCardMain";
-          classCardMainSideStraps.className = `classCardMainSideStraps`;
-          classCardMainSideStrapsDelete.className = `classCardMainSideStrapsDelete`;
-          classCardMainSideStrapsDeleteBtn.className = `classCardMainSideStrapsDeleteBtn`;
-
-          classCardMainInfo.className = `classCardMainInfoDiv`;
-          classCardMainInfoSub.className = `classCardMainInfoSubParagraph`;
-          classCardMainInfoDept.className = `classCardMainInfoDeptParagraph`;
-          classCardMainInfoSDShift.className = `classCardMainInfoSDShiftParagraph`;
-
-          classCardMainSideStrapsGenerateBtn.className =
-            "classCardMainSideStrapsGenerateBtn";
-          classCardMainSideStrapsGenerateBtnRandom.className =
-            "classCardMainSideStrapsGenerateBtnRandom";
-          classCardMainSideStrapsGenerateBtnRandomAgain.className =
-            "classCardMainSideStrapsGenerateBtnRandomAgain";
-          classCardMainSideStrapsGenerateBtnRandomNext.className =
-            "classCardMainSideStrapsGenerateBtnRandomNext";
-
-          classCardMainSideStrapsGenerateBtn.addEventListener("click", () => {
-            classCardMainSideStraps.classList.toggle("strapsSlide");
-
-            classCardMainSideStraps.removeChild(
-              classCardMainSideStrapsGenerateBtn
-            );
-            classCardMainSideStraps.appendChild(
-              classCardMainSideStrapsGenerateBtnRandom
-            );
-            classCardMainSideStrapsGenerateBtnRandom.classList.toggle(
-              "showStrapsBtn"
-            );
-
-            randomNumberEquation = Math.floor(1000 + Math.random() * 9000);
-            classCardMainSideStrapsGenerateBtnRandomNumber.textContent = randomNumberEquation;
-            this.setState({ randomNumber: randomNumberEquation });
-          });
-
-          classCardMainSideStrapsGenerateBtnRandom.addEventListener(
-            "click",
-            () => {
-              classCardMainSideStraps.classList.toggle("strapsSlide");
-              classCardMainSideStrapsGenerateBtnRandom.classList.toggle(
-                "showStrapsBtn"
-              );
-            }
-          );
-
-          classCardMainSideStrapsGenerateBtnRandomAgain.addEventListener(
-            "click",
-            () => {
-              randomNumberEquation = Math.floor(1000 + Math.random() * 9000);
-              classCardMainSideStrapsGenerateBtnRandomNumber.textContent = randomNumberEquation;
-              this.setState({ randomNumber: randomNumberEquation });
-            }
-          );
-
-          classCardMain.addEventListener("click", () => {
-            if (this.state.classCardMainSideStrapsDeleteToggle) {
-              classCardMainSideStrapsDelete.classList.toggle(
-                "strapsSlideDelete"
-              );
-              classCardMainSideStrapsDeleteBtn.classList.toggle(
-                "showStrapsBtn"
-              );
-            }
-            if (!this.state.classCardMainSideStrapsDeleteToggle) {
-              classCardMainSideStrapsDeleteBtn.classList.remove(
-                "showStrapsBtn"
-              );
-
-              classCardMainSideStraps.classList.toggle("strapsSlide");
-              classCardMainSideStrapsGenerateBtn.classList.toggle(
-                "showStrapsBtn"
-              );
-              classCardMainSideStrapsGenerateBtnRandom.classList.toggle(
-                "showStrapsBtn"
-              );
-            }
-          });
-
-          classCardMainSideStrapsGenerateBtnRandomNext.addEventListener(
-            "click",
-            () => {
-              if (
-                prompt("Enter your Access code to go ahead") ===
-                this.state.fac_access_code
-              ) {
-                this.currentTime();
-                this.setState({ StudentAttendanceCheckToggle: true });
-                this.props.firebase
-                  .studentLength(
-                    this.state.fac_college_name,
-                    this.state.facAuthID,
-                    current_facultySub_key
-                  )
-                  .orderByKey()
-                  .once("value", (snapshot) => {
-                    var subStuLength = snapshot.numChildren();
-
-                    this.setState({ stuLength: subStuLength });
-                  });
-
-                this.props.firebase
-                  .studentLength(
-                    this.state.fac_college_name,
-                    this.state.facAuthID,
-                    current_facultySub_key
-                  )
-                  .orderByKey()
-                  .on("value", (snapshot) => {
-                    var subStuLength = snapshot.numChildren();
-                    this.setState({ stuLength: subStuLength });
+              this.props.firebase
+                .studentLength(
+                  this.state.fac_college_name,
+                  stuCardInfoObj.FacKey,
+                  stuCardInfoObj.SubFacKey
+                )
+                .orderByKey()
+                .on("value", (snapshot) => {
+                  if (this._isMounted) {
                     let liveSubStuLength = 0;
 
                     var subStudents = snapshot.val();
@@ -438,20 +297,26 @@ class ClassroomSection extends Component {
                     this.setState({
                       liveSubStuLength: liveSubStuLength,
                     });
-                  });
+                  }
+                });
 
-                this.props.firebase
-                  .studentLength(
-                    this.state.fac_college_name,
-                    this.state.facAuthID,
-                    current_facultySub_key
-                  )
-                  .on("child_added", (snapshot) => {
+              this.props.firebase
+                .studentLength(
+                  this.state.fac_college_name,
+                  stuCardInfoObj.FacKey,
+                  stuCardInfoObj.SubFacKey
+                )
+                .orderByChild("stu_enrolno")
+                .on("child_added", (snapshot) => {
+                  if (this._isMounted) {
                     var subStuKey = snapshot.key;
+                    this.setState({ subStuKey: subStuKey });
+
                     var subStuInfo = snapshot.val();
 
                     var studsCardEnrolNo = subStuInfo.stu_enrolno;
                     var studsCardName = subStuInfo.stu_name;
+
                     var StudentAttendanceCard = document.createElement("div");
                     var StudentAttendanceCardInfo = document.createElement(
                       "div"
@@ -469,27 +334,6 @@ class ClassroomSection extends Component {
                     var StudentAttendanceCardBtnIndicator = document.createElement(
                       "div"
                     );
-                    var StudentAttendanceCardBtnAddCancel = document.createElement(
-                      "div"
-                    );
-
-                    const StudentAttendanceCardBtnCancel = ReactDOMServer.renderToStaticMarkup(
-                      <FontAwesomeIcon
-                        icon="minus"
-                        style={{
-                          fontSize: `12px`,
-                        }}
-                      />
-                    );
-
-                    const StudentAttendanceCardBtnAdd = ReactDOMServer.renderToStaticMarkup(
-                      <FontAwesomeIcon
-                        icon="plus"
-                        style={{
-                          fontSize: `12px`,
-                        }}
-                      />
-                    );
 
                     StudentAttendanceCard.className = "StudentAttendanceCard";
                     StudentAttendanceCardInfo.className =
@@ -502,56 +346,6 @@ class ClassroomSection extends Component {
                       "StudentAttendanceCardBtn";
                     StudentAttendanceCardBtnIndicator.className =
                       "StudentAttendanceCardBtnIndicator";
-                    StudentAttendanceCardBtnAddCancel.className =
-                      "StudentAttendanceCardBtnAddCancel";
-
-                    this.StudentAttendanceCardPresentList.current.addEventListener(
-                      "click",
-                      () => {
-                        StudentAttendanceCardBtnAddCancel.className =
-                          "StudentAttendanceCardBtnAddCancelHide";
-
-                        this.StudentAttendanceCardLast.current.className =
-                          "AttendeeBaseMainLeaveChoiceBtnDivHide";
-                        this.props.firebase
-                          .studentLengthAttendance(
-                            this.state.fac_college_name,
-                            this.state.facAuthID,
-                            current_facultySub_key,
-                            subStuKey
-                          )
-                          .on("value", (snapshot) => {
-                            if (snapshot.val().attendance === "absent") {
-                              StudentAttendanceCard.className =
-                                "StudentAttendanceCardHide";
-                            }
-                          });
-                      }
-                    );
-
-                    this.StudentAttendanceCardAbsentList.current.addEventListener(
-                      "click",
-                      () => {
-                        StudentAttendanceCardBtnAddCancel.className =
-                          "StudentAttendanceCardBtnAddCancelHide";
-
-                        this.StudentAttendanceCardLast.current.className =
-                          "AttendeeBaseMainLeaveChoiceBtnDivHide";
-                        this.props.firebase
-                          .studentLengthAttendance(
-                            this.state.fac_college_name,
-                            this.state.facAuthID,
-                            current_facultySub_key,
-                            subStuKey
-                          )
-                          .on("value", (snapshot) => {
-                            if (snapshot.val().attendance === "present") {
-                              StudentAttendanceCard.className =
-                                "StudentAttendanceCardHide";
-                            }
-                          });
-                      }
-                    );
 
                     StudentAttendanceCard.appendChild(
                       StudentAttendanceCardInfo
@@ -569,472 +363,118 @@ class ClassroomSection extends Component {
                       StudentAttendanceCardBtnIndicator
                     );
 
-                    StudentAttendanceCardInfo.addEventListener("click", () => {
-                      this.setState((prevState) => {
-                        return {
-                          StudentAttendanceCardInfo: !prevState.StudentAttendanceCardInfo,
-                        };
-                      });
-
-                      if (this.state.StudentAttendanceCardInfo) {
-                        StudentAttendanceCardInfoEnrolNo.className =
-                          "StudentAttendanceCardInfoEnrolNoHide";
-                        StudentAttendanceCardInfoName.className =
-                          "StudentAttendanceCardInfoName";
-                      } else {
-                        StudentAttendanceCardInfoEnrolNo.className =
-                          "StudentAttendanceCardInfoEnrolNo";
-                        StudentAttendanceCardInfoName.className =
-                          "StudentAttendanceCardInfoNameHide";
-                      }
-                    });
+                    if (studsCardEnrolNo === this.state.stu_enrolno) {
+                      studsCardEnrolNo = "You";
+                    }
 
                     StudentAttendanceCardInfoEnrolNo.append(studsCardEnrolNo);
                     StudentAttendanceCardInfoName.append(studsCardName);
 
-                    this.props.firebase
-                      .studentLengthAttendance(
-                        this.state.fac_college_name,
-                        this.state.facAuthID,
-                        current_facultySub_key,
-                        subStuKey
-                      )
-                      .on("value", (snapshot) => {
-                        if (snapshot.val().attendance === "present") {
-                          StudentAttendanceCardBtnIndicator.className =
-                            "StudentAttendanceCardBtnIndicatorOn";
-
-                          StudentAttendanceCardBtnAddCancel.innerHTML = StudentAttendanceCardBtnCancel;
-
-                          StudentAttendanceCardBtnAddCancel.addEventListener(
-                            "click",
-                            () => {
-                              this.props.firebase
-                                .studentLengthAttendance(
-                                  this.state.fac_college_name,
-                                  this.state.facAuthID,
-                                  current_facultySub_key,
-                                  subStuKey
-                                )
-                                .update({
-                                  attendance: "absent",
-                                })
-                                .catch((error) => {
-                                  console.log(error);
-                                });
-                            }
-                          );
-                          StudentAttendanceCardBtn.appendChild(
-                            StudentAttendanceCardBtnAddCancel
-                          );
-                        } else {
-                          StudentAttendanceCardBtnIndicator.className =
-                            "StudentAttendanceCardBtnIndicator";
-
-                          StudentAttendanceCardBtnAddCancel.innerHTML = StudentAttendanceCardBtnAdd;
-
-                          StudentAttendanceCardBtnAddCancel.addEventListener(
-                            "click",
-                            () => {
-                              this.props.firebase
-                                .studentLengthAttendance(
-                                  this.state.fac_college_name,
-                                  this.state.facAuthID,
-                                  current_facultySub_key,
-                                  subStuKey
-                                )
-                                .update({
-                                  attendance: "present",
-                                })
-                                .catch((error) => {
-                                  console.log(error);
-                                });
-                            }
-                          );
-
-                          StudentAttendanceCardBtn.appendChild(
-                            StudentAttendanceCardBtnAddCancel
-                          );
-                        }
-                      });
+                    StudentAttendanceCard.addEventListener("click", () => {
+                      StudentAttendanceCardInfoEnrolNo.classList.toggle(
+                        "StudentAttendanceCardInfoEnrolNoHide"
+                      );
+                      StudentAttendanceCardInfoName.classList.toggle(
+                        "StudentAttendanceCardInfoName"
+                      );
+                    });
 
                     this.StudentAttendanceCardMain.current.insertBefore(
                       StudentAttendanceCard,
                       this.StudentAttendanceCardLast.current
                     );
-                  });
 
-                this.setState({
-                  facCardInfoObj: {
-                    subject,
-                    current_facultySub_key,
-                    department,
-                    semester,
-                    division,
-                    shift,
-                  },
+                    this.props.firebase
+                      .studentLengthAttendance(
+                        this.state.fac_college_name,
+                        stuCardInfoObj.FacKey,
+                        stuCardInfoObj.SubFacKey,
+                        subStuKey
+                      )
+                      .on("value", (snapshot) => {
+                        if (this._isMounted) {
+                          if (snapshot.val().attendance === "present") {
+                            StudentAttendanceCardBtnIndicator.className =
+                              "StudentAttendanceCardBtnIndicatorOn";
+                          } else if (snapshot.val().attendance === "absent") {
+                            StudentAttendanceCardBtnIndicator.className =
+                              "StudentAttendanceCardBtnIndicator";
+                          }
+                        }
+                      });
+                  }
                 });
-
-                this.props.firebase
-                  .facultySubjects(
-                    this.state.facAuthID,
-                    this.state.fac_college_name
-                  )
-                  .child(current_facultySub_key)
-                  .update({
-                    random_access: {
-                      access_boolean: true,
-                      random_number: this.state.randomNumber,
-                    },
-                  })
-
-                  .catch((error) => {
-                    console.log(error);
-                  });
-
-                alert(
-                  "Please make sure that you do not refresh your page untill you're done taking everyone's attendance, otherwise you'll lose all of your records."
-                );
-              } else {
-                alert("Wrong Access Code! Try Again.");
-              }
-            }
-          );
-
-          classCardMainSideStrapsDeleteBtn.addEventListener("click", () => {
-            window.location.reload(true);
-            this.props.firebase
-              .facultySubjects(
-                this.state.facAuthID,
-                this.state.fac_college_name
-              )
-              .child(`${current_facultySub_key}`)
-              .remove();
-          });
-
-          classCardMainFacSection.appendChild(classCardMain);
-          classCardMain.appendChild(classCardMainSideStraps);
-          classCardMain.appendChild(classCardMainSideStrapsDelete);
-          classCardMain.appendChild(classCardMainInfo);
-          classCardMainInfo.appendChild(classCardMainInfoSub);
-          classCardMainInfo.appendChild(classCardMainInfoDept);
-          classCardMainInfo.appendChild(classCardMainInfoSDShift);
-          classCardMainInfoSDShift.appendChild(classCardMainInfoSem);
-          classCardMainInfoSDShift.appendChild(classCardMainInfoDiv);
-          classCardMainInfoSDShift.appendChild(classCardMainInfoShift);
-
-          classCardMainSideStraps.appendChild(
-            classCardMainSideStrapsGenerateBtn
-          );
-          classCardMainSideStrapsGenerateBtnRandom.appendChild(
-            classCardMainSideStrapsGenerateBtnRandomNext
-          );
-          classCardMainSideStrapsGenerateBtnRandom.appendChild(
-            classCardMainSideStrapsGenerateBtnRandomAgain
-          );
-
-          classCardMainSideStrapsGenerateBtn.append("Generate a Random PIN");
-
-          classCardMainInfoSub.textContent = `${subject}`;
-          classCardMainInfoDept.textContent = department;
-          classCardMainInfoSem.textContent = `Sem(${semester}) - `;
-          classCardMainInfoDiv.textContent = `Div(${division}) - `;
-          classCardMainInfoShift.textContent = `Shift(${shift})`;
-
-          this.classCardMainFacStuSection.current.appendChild(
-            classCardMainFacSection
-          );
-        });
-    } else if (this.state.authUser.role === "Student") {
-      this.setState({ StudentAttendanceCheckToggle: false });
-
-      this.props.firebase
-        .studentSubjects(stu_college_name)
-        .orderByKey()
-        .on("child_added", (snapshot) => {
-          var FacKey = snapshot.key;
-
-          this.props.firebase
-            .facultySubjects(FacKey, stu_college_name)
-            .on("child_added", (snapshot) => {
-              // console.log(snapshot.val());
-
-              if (
-                snapshot.val().department === stu_dept &&
-                snapshot.val().semester === stu_sem &&
-                snapshot.val().division === stu_div &&
-                snapshot.val().shift === stu_shift
-              ) {
-                var cardDeptInfo = snapshot.val().department;
-                var StuSubject = snapshot.val().subject;
-                var SubFacName = snapshot.val().fname;
-                var SubFacKey = snapshot.key;
-                // console.log(SubFacKey);
-
-                this.setState({
-                  stuCardInfoObj: {
-                    StuSubject,
-                    SubFacName,
-                    cardDeptInfo,
-                    SubFacKey,
-                    FacKey,
-                  },
-                });
-                const { stuCardInfoObj } = this.state;
-
-                var classCardMainStuSection = document.createElement("div");
-                var classCardMain = document.createElement("div");
-                var classCardMainSideStraps = document.createElement("div");
-                var classCardMainInfo = document.createElement("div");
-                var classCardMainInfoSub = document.createElement("h3");
-                var classCardMainInfoFacName = document.createElement("p");
-
-                classCardMainStuSection.className = "classCardMainStuSection";
-                classCardMain.className = "classCardMain";
-                classCardMainSideStraps.className = "classCardMainSideStraps";
-                classCardMainStuSection.appendChild(classCardMain);
-                classCardMain.appendChild(classCardMainSideStraps);
-                classCardMain.appendChild(classCardMainInfo);
-                classCardMainInfo.appendChild(classCardMainInfoSub);
-                classCardMainInfo.appendChild(classCardMainInfoFacName);
-
-                classCardMainInfoSub.append(StuSubject);
-                classCardMainInfoFacName.append(SubFacName);
-
-                this.classCardMainFacStuSection.current.appendChild(
-                  classCardMainStuSection
-                );
-
-                classCardMain.addEventListener("click", () => {
-                  this.props.firebase
-                    .facultySubjects(
-                      stuCardInfoObj.FacKey,
-                      this.state.fac_college_name
-                    )
-                    .child(`${stuCardInfoObj.SubFacKey}/random_access`)
-                    .once("value", (snapshot) => {
-                      const fetchrandomno = snapshot.val();
-                      const stufetchrandomno = prompt("Enter your Access code");
-
-                      if (
-                        parseInt(stufetchrandomno) ===
-                          fetchrandomno.random_number &&
-                        fetchrandomno.access_boolean === true
-                      ) {
-                        this.props.firebase
-                          .studentLengthAttendance(
-                            this.state.fac_college_name,
-                            stuCardInfoObj.FacKey,
-                            stuCardInfoObj.SubFacKey,
-                            this.state.stu_uid
-                          )
-                          .once("value", (snapshot) => {
-                            var subStudents = snapshot.val();
-                            this.setState({
-                              StudentAttendanceCheckAgain:
-                                subStudents.attendance,
-                            });
-
-                            if (
-                              this.state.StudentAttendanceCheckAgain ===
-                              "absent"
-                            ) {
-                              this.currentTime();
-
-                              this.props.firebase
-                                .studentLength(
-                                  this.state.fac_college_name,
-                                  stuCardInfoObj.FacKey,
-                                  stuCardInfoObj.SubFacKey
-                                )
-                                .orderByKey()
-                                .on("value", (snapshot) => {
-                                  var subStuLength = snapshot.numChildren();
-                                  this.setState({ stuLength: subStuLength });
-                                  let liveSubStuLength = 0;
-
-                                  // console.log(snapshot.val());
-                                  var subStudents = snapshot.val();
-                                  for (var substu in subStudents) {
-                                    if (
-                                      subStudents[substu].attendance ===
-                                      "present"
-                                    ) {
-                                      liveSubStuLength = liveSubStuLength + 1;
-                                    }
-                                  }
-                                  this.setState({
-                                    liveSubStuLength: liveSubStuLength,
-                                  });
-                                });
-
-                              this.props.firebase
-                                .studentLength(
-                                  this.state.fac_college_name,
-                                  stuCardInfoObj.FacKey,
-                                  stuCardInfoObj.SubFacKey
-                                )
-                                .orderByKey()
-                                .on("child_added", (snapshot) => {
-                                  const subStuKey = snapshot.key;
-                                  this.setState({ subStuKey: subStuKey });
-
-                                  var subStuInfo = snapshot.val();
-
-                                  var studsCardEnrolNo = subStuInfo.stu_enrolno;
-                                  var studsCardName = subStuInfo.stu_name;
-
-                                  var StudentAttendanceCard = document.createElement(
-                                    "div"
-                                  );
-                                  var StudentAttendanceCardInfo = document.createElement(
-                                    "div"
-                                  );
-                                  var StudentAttendanceCardInfoEnrolNo = document.createElement(
-                                    "div"
-                                  );
-                                  var StudentAttendanceCardInfoName = document.createElement(
-                                    "div"
-                                  );
-                                  var StudentAttendanceCardBtn = document.createElement(
-                                    "div"
-                                  );
-
-                                  var StudentAttendanceCardBtnIndicator = document.createElement(
-                                    "div"
-                                  );
-
-                                  StudentAttendanceCard.className =
-                                    "StudentAttendanceCard";
-                                  StudentAttendanceCardInfo.className =
-                                    "StudentAttendanceCardInfo";
-                                  StudentAttendanceCardInfoEnrolNo.className =
-                                    "StudentAttendanceCardInfoEnrolNo";
-                                  StudentAttendanceCardInfoName.className =
-                                    "StudentAttendanceCardInfoNameHide";
-                                  StudentAttendanceCardBtn.className =
-                                    "StudentAttendanceCardBtn";
-                                  StudentAttendanceCardBtnIndicator.className =
-                                    "StudentAttendanceCardBtnIndicator";
-
-                                  StudentAttendanceCard.appendChild(
-                                    StudentAttendanceCardInfo
-                                  );
-                                  StudentAttendanceCard.appendChild(
-                                    StudentAttendanceCardBtn
-                                  );
-
-                                  StudentAttendanceCardInfo.appendChild(
-                                    StudentAttendanceCardInfoEnrolNo
-                                  );
-                                  StudentAttendanceCardInfo.appendChild(
-                                    StudentAttendanceCardInfoName
-                                  );
-
-                                  StudentAttendanceCardBtn.appendChild(
-                                    StudentAttendanceCardBtnIndicator
-                                  );
-
-                                  if (
-                                    studsCardEnrolNo === this.state.stu_enrolno
-                                  ) {
-                                    studsCardEnrolNo = "You";
-                                  }
-
-                                  StudentAttendanceCardInfoEnrolNo.append(
-                                    studsCardEnrolNo
-                                  );
-                                  StudentAttendanceCardInfoName.append(
-                                    studsCardName
-                                  );
-
-                                  StudentAttendanceCard.addEventListener(
-                                    "click",
-                                    () => {
-                                      this.setState((prevState) => {
-                                        return {
-                                          StudentAttendanceCardInfo: !prevState.StudentAttendanceCardInfo,
-                                        };
-                                      });
-
-                                      if (
-                                        this.state.StudentAttendanceCardInfo
-                                      ) {
-                                        StudentAttendanceCardInfoEnrolNo.className =
-                                          "StudentAttendanceCardInfoEnrolNoHide";
-                                        StudentAttendanceCardInfoName.className =
-                                          "StudentAttendanceCardInfoName";
-                                      } else {
-                                        StudentAttendanceCardInfoEnrolNo.className =
-                                          "StudentAttendanceCardInfoEnrolNo";
-                                        StudentAttendanceCardInfoName.className =
-                                          "StudentAttendanceCardInfoNameHide";
-                                      }
-                                    }
-                                  );
-
-                                  this.StudentAttendanceCardMain.current.insertBefore(
-                                    StudentAttendanceCard,
-                                    this.StudentAttendanceCardLast.current
-                                  );
-
-                                  this.props.firebase
-                                    .studentLengthAttendance(
-                                      this.state.fac_college_name,
-                                      stuCardInfoObj.FacKey,
-                                      stuCardInfoObj.SubFacKey,
-                                      this.state.subStuKey
-                                    )
-                                    .on("value", (snapshot) => {
-                                      if (
-                                        snapshot.val().attendance === "present"
-                                      ) {
-                                        StudentAttendanceCardBtnIndicator.className =
-                                          "StudentAttendanceCardBtnIndicatorOn";
-                                      } else if (
-                                        snapshot.val().attendance === "absent"
-                                      ) {
-                                        StudentAttendanceCardBtnIndicator.className =
-                                          "StudentAttendanceCardBtnIndicator";
-                                      }
-                                    });
-                                });
-
-                              this.setState({
-                                stuCardInfoObj: {
-                                  SubFacKey: stuCardInfoObj.SubFacKey,
-                                  FacKey: stuCardInfoObj.FacKey,
-                                },
-                              });
-                              this.setState({
-                                scanningCardToggle: true,
-                                isToggle: true,
-                                /*To blur the whole background */
-                              });
-                            } else if (
-                              this.state.StudentAttendanceCheckAgain ===
-                              "present"
-                            ) {
-                              alert(
-                                "You've already submitted your attendance once."
-                              );
-                            } else {
-                              alert("Something is Wrong!");
-                            }
-                          });
-                      } else {
-                        alert("Wrong Access code! Try Again.");
-                      }
-                    });
-                });
-              }
             });
-        });
+        } else {
+          this.setState({ barcodeSuccessFailToggle: true });
+        }
+      };
     }
+
+    document.addEventListener("touchstart", this.handleTouchStart, false);
+    document.addEventListener("touchmove", this.handleTouchMove, false);
   }
 
-  currentTimeSetTimeout = () => {
-    setTimeout(this.currentTime, 500);
+  componentWillUnmount() {
+    this._isMounted = false;
+    try {
+      this.props.firebase.db.goOffline();
+    } catch (error) {
+      console.log(error);
+    }
+    document.removeEventListener("touchstart", this.handleTouchStart, false);
+    document.removeEventListener("touchmove", this.handleTouchMove, false);
+  }
+
+  getTouches = (evt) => {
+    return (
+      evt.touches || evt.originalEvent.touches // browser API
+    ); // jQuery
+  };
+
+  handleTouchStart = (evt) => {
+    const firstTouch = this.getTouches(evt)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+  };
+
+  handleTouchMove = (evt) => {
+    if (!xDown || !yDown) {
+      return;
+    }
+
+    var xUp = evt.touches[0].clientX;
+    var yUp = evt.touches[0].clientY;
+
+    var xDiff = xDown - xUp;
+    var yDiff = yDown - yUp;
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
+      /*most significant*/
+      if (xDiff > 0) {
+        /* left swipe */
+        if (!this.state.addBlur) {
+          this.setState({ isToggleHamburger: false });
+        }
+      } else {
+        if (xDown <= 40) {
+          /* rigth swipe */
+
+          if (!this.state.addBlur) {
+            this.setState({ isToggleHamburger: true });
+          }
+        }
+      }
+    } else {
+      if (yDiff > 0) {
+        /* up swipe */
+      } else {
+        /* down swipe */
+      }
+    }
+    /* reset values */
+    xDown = null;
+    yDown = null;
   };
 
   checkTime = (i) => {
@@ -1042,6 +482,10 @@ class ClassroomSection extends Component {
       i = "0" + i;
     } // add zero in front of numbers < 10
     return i;
+  };
+
+  currentTimeSetTimeout = () => {
+    setTimeout(this.currentTime, 500);
   };
 
   currentTime = () => {
@@ -1062,214 +506,31 @@ class ClassroomSection extends Component {
       classCardMainSideStrapsDeleteToggle: !this.state
         .classCardMainSideStrapsDeleteToggle,
     });
+    this.setState({
+      classCardMainAddStudentsToggle: false,
+    });
   };
 
   onEditBarEditBtnIcon = () => {
-    alert("Work in Progress!");
+    this.setState({
+      classCardMainAddStudentsToggle: !this.state
+        .classCardMainAddStudentsToggle,
+    });
+    this.setState({
+      classCardMainSideStrapsDeleteToggle: false,
+    });
   };
 
   AttendeesExitBtn = () => {
-    if (this.state.authUser.role === "Faculty") {
-      if (
-        prompt(
-          "Enter 'Exit' & Press OK to EXIT! (Note: You won't be able to record other students' attendance anymore once you go ahead.",
-          "Exit"
-        ) === "Exit"
-      ) {
-        const { facCardInfoObj } = this.state;
-
-        this.props.firebase
-          .facultySubjects(this.state.facAuthID, this.state.fac_college_name)
-          .child(facCardInfoObj.current_facultySub_key)
-          .update({
-            random_access: {
-              access_boolean: false,
-              random_number: 0,
-            },
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-
-        window.location.reload(true);
-        this.props.history.push(ROUTES.CLASSROOM);
-      }
-    }
-
-    if (this.state.authUser.role === "Student") {
-      window.location.reload(true);
-      this.props.history.push(ROUTES.CLASSROOM);
-    }
+    this.setState({ showAlertExit: true });
   };
 
   AttendeesDBAddBtn = () => {
     if (this.state.authUser.role === "Faculty") {
-      if (
-        prompt(
-          "Enter 'Y' & Press OK to move forward! (Note: You won't be able to record other students' attendance anymore once you go ahead.",
-          "Y"
-        ) === "Y"
-      ) {
-        const { facCardInfoObj } = this.state;
-
-        this.props.firebase
-          .studentLength(
-            this.state.fac_college_name,
-            this.state.facAuthID,
-            facCardInfoObj.current_facultySub_key
-          )
-          .orderByKey()
-          .on("child_added", (snapshot) => {
-            var subStuKey = snapshot.key;
-
-            this.props.firebase
-              .studentLengthAttendance(
-                this.state.fac_college_name,
-                this.state.facAuthID,
-                facCardInfoObj.current_facultySub_key,
-                subStuKey
-              )
-              .on("value", (snapshot) => {
-                var stuAttendance = snapshot.val().attendance;
-                var stuEnNo = snapshot.val().stu_enrolno;
-                var stuName = snapshot.val().stu_name;
-
-                this.props.firebase
-                  .facultySubjects(
-                    this.state.facAuthID,
-                    this.state.fac_college_name
-                  )
-                  .child(
-                    `${facCardInfoObj.current_facultySub_key}/attendees/${this.state.date}/${this.state.randomNumber}`
-                  )
-                  .push({
-                    stuAttendance,
-                    stuEnNo,
-                    stuName,
-                  });
-              });
-          });
-
-        window.location.reload(true);
-      }
+      this.setState({ showAlertAddDb: true });
     }
 
     //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.
-  };
-
-  PDFExportPresent = () => {
-    if (this.state.authUser.role === "Faculty") {
-      if (
-        prompt(
-          "Enter 'Y' & Press OK to move forward! (Note: You won't be able to record other students' attendance anymore once you go ahead.",
-          "Y"
-        ) === "Y"
-      ) {
-        const { facCardInfoObj } = this.state;
-
-        this.props.firebase
-          .studentLength(
-            this.state.fac_college_name,
-            this.state.facAuthID,
-            facCardInfoObj.current_facultySub_key
-          )
-          .orderByKey()
-          .on("child_added", (snapshot) => {
-            var subStuKey = snapshot.key;
-
-            this.props.firebase
-              .studentLengthAttendance(
-                this.state.fac_college_name,
-                this.state.facAuthID,
-                facCardInfoObj.current_facultySub_key,
-                subStuKey
-              )
-              .on("value", (snapshot) => {
-                var stuAttendance = snapshot.val().attendance;
-                var stuEnNo = snapshot.val().stu_enrolno;
-                var stuName = snapshot.val().stu_name;
-
-                this.props.firebase
-                  .facultySubjects(
-                    this.state.facAuthID,
-                    this.state.fac_college_name
-                  )
-                  .child(
-                    `${facCardInfoObj.current_facultySub_key}/attendees/${this.state.date}/${this.state.randomNumber}`
-                  )
-                  .push({
-                    stuAttendance,
-                    stuEnNo,
-                    stuName,
-                  });
-              });
-          });
-
-        this.pdfExportComponent.save();
-        window.location.reload(true);
-      }
-    }
-
-    //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.
-  };
-
-  PDFExportAbsent = () => {
-    if (this.state.authUser.role === "Faculty") {
-      if (
-        prompt(
-          "Enter 'Y' & Press OK to move forward! (Note: You won't be able to record other students' attendance anymore once you go ahead.",
-          "Y"
-        ) === "Y"
-      ) {
-        const { facCardInfoObj } = this.state;
-
-        this.props.firebase
-          .studentLength(
-            this.state.fac_college_name,
-            this.state.facAuthID,
-            facCardInfoObj.current_facultySub_key
-          )
-          .orderByKey()
-          .on("child_added", (snapshot) => {
-            var subStuKey = snapshot.key;
-
-            this.props.firebase
-              .studentLengthAttendance(
-                this.state.fac_college_name,
-                this.state.facAuthID,
-                facCardInfoObj.current_facultySub_key,
-                subStuKey
-              )
-              .on("value", (snapshot) => {
-                var stuAttendance = snapshot.val().attendance;
-                var stuEnNo = snapshot.val().stu_enrolno;
-                var stuName = snapshot.val().stu_name;
-
-                this.props.firebase
-                  .facultySubjects(
-                    this.state.facAuthID,
-                    this.state.fac_college_name
-                  )
-                  .child(
-                    `${facCardInfoObj.current_facultySub_key}/attendees/${this.state.date}/${this.state.randomNumber}`
-                  )
-                  .push({
-                    stuAttendance,
-                    stuEnNo,
-                    stuName,
-                  });
-              });
-          });
-
-        this.pdfExportComponent.save();
-        window.location.reload(true);
-      }
-    }
-    //You can not update attendance to absent in this fun. as it will make absent every students even in the pdf.  };
-  };
-
-  onIDCardClick = () => {
-    alert("Work in Progress!");
   };
 
   _onDetected = (result) => {
@@ -1294,6 +555,11 @@ class ClassroomSection extends Component {
       onScanAlternativeToggle: true,
       barcodeSuccessFailToggle: false,
     });
+    try {
+      Quagga.stop();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   _onReScan = () => {
@@ -1302,41 +568,16 @@ class ClassroomSection extends Component {
     });
   };
 
-  _onConfirm = () => {
-    if (
-      this.state.resultBarcode === this.state.stu_enrolno ||
-      this.state.alt_enrolment_no === this.state.stu_enrolno
-    ) {
-      this.setState({ StudentAttendanceCheckToggle: true });
-
-      const { stuCardInfoObj } = this.state;
-
-      this.props.firebase
-        .studentLengthAttendance(
-          this.state.fac_college_name,
-          stuCardInfoObj.FacKey,
-          stuCardInfoObj.SubFacKey,
-          this.state.stu_uid
-        )
-        .update({
-          attendance: "present",
-        })
-        .then(() => {
-          this.setState({ scanningCardToggle: false, isToggle: false });
-          alert("You've successfully recorded your attendance!");
-        });
-    } else {
-      this.setState({ barcodeSuccessFailToggle: true });
-    }
-  };
-
   onCardClick = () => {
     this.setState({ onCardClickToggle: !this.state.onCardClickToggle });
     console.log(this.state.onCardClickToggle);
   };
 
   addBtnToggle = () => {
-    this.setState({ isToggle: !this.state.isToggle });
+    this.setState({
+      isToggle: !this.state.isToggle,
+      addBlur: !this.state.addBlur,
+    });
   };
 
   nextClickBtn = () => {
@@ -1367,13 +608,13 @@ class ClassroomSection extends Component {
 
   onSubmit = () => {
     const {
-      fac_name,
       fac_college_name,
       subject,
       department,
       semester,
       division,
       shift,
+      queCardSelectionOptions,
     } = this.state;
 
     if (
@@ -1384,6 +625,14 @@ class ClassroomSection extends Component {
       this.state.division !== "DIVISION--" &&
       this.state.shift !== "COLLEGE SHIFT--"
     ) {
+      this.setState({
+        selectionCardToggle: true,
+        isToggle: !this.state.isToggle,
+        addBlur: !this.state.addBlur,
+        isHide: false,
+        isHideLast: 0,
+        ...INITIAL_STATE_ADD_CLASS_INPUTS,
+      });
       //To add the data of the subject
       const autoFacultySubKey = this.props.firebase
         .facultySubjects(this.state.facAuthID, fac_college_name)
@@ -1398,19 +647,7 @@ class ClassroomSection extends Component {
           semester,
           division,
           shift,
-          fname: fac_name,
-        })
-        .then(() => {
-          this.setState({
-            isToggle: !this.state.isToggle,
-            isHide: false,
-            isHideLast: 0,
-            department: "",
-            subject: "",
-            semester: "",
-            division: "",
-            shift: "",
-          });
+          room: queCardSelectionOptions,
         })
         .catch((error) => {
           console.log(error);
@@ -1420,15 +657,341 @@ class ClassroomSection extends Component {
     }
   };
 
-  onFeedbackClick = () => {
-    alert(
-      "Send me your feedback on this email address => tirthpatel5885@gmail.com"
-    );
+  queCardSelectionOptionClassMethod = () => {
+    this.setState({
+      selectionCardToggle: false,
+      queCardSelectionOptions: "class",
+    });
+  };
+  queCardSelectionOptionLabMethod = () => {
+    this.setState({
+      selectionCardToggle: false,
+      queCardSelectionOptions: "lab",
+    });
   };
 
-  onClickRecordsLi = () => {
-    this.props.history.push(ROUTES.RECORDS);
+  addStudentsClose = () => {
+    this.setState({
+      addStudents: false,
+      addBlur: !this.state.addBlur,
+      addNavBlur: !this.state.addNavBlur,
+    });
     window.location.reload(true);
+  };
+
+  addStudentsNext = () => {
+    this.setState({
+      addStudents: false,
+      addBlur: !this.state.addBlur,
+      addNavBlur: !this.state.addNavBlur,
+      classCardMainAddStudentsToggle: !this.state
+        .classCardMainAddStudentsToggle,
+    });
+  };
+
+  unclickableToggle = (toggleBoolean) => {
+    this.setState({ unClickable: toggleBoolean });
+  };
+
+  onSubjectClick = (current_subKey, current_facKey) => {
+    // console.log(current_subKey, current_facKey);
+
+    if (this.state.authUser.role === "Student") {
+      this.setState({
+        stuCardInfoObj: {
+          SubFacKey: current_subKey,
+          FacKey: current_facKey,
+        },
+      });
+      this.setState({ showAlertAccessCode: true });
+    }
+  };
+
+  onRandomCodeNextClick = (
+    current_subKey,
+    current_facKey,
+    randomCode,
+    current_subData
+  ) => {
+    this.props.firebase
+      .studentLength(
+        this.state.fac_college_name,
+        current_facKey, //OR this.state.facAuthId
+        current_subKey
+      )
+      .orderByKey()
+      .once("value", (snapshot) => {
+        if (this._isMounted) {
+          var subStuLength = snapshot.numChildren();
+          if (subStuLength === 0) {
+            this.setState({
+              classCardMainAddStudentsToggle: true,
+            });
+            this.onAddStudentsClick(current_subKey, current_subData);
+          } else {
+            this.props.firebase
+              .facultySubjects(
+                this.state.authUser.uid,
+                this.state.fac_college_name
+              )
+              .child(`${current_subKey}/students`)
+              .on("child_added", (snapshot) => {
+                this.props.firebase
+                  .facultySubjects(
+                    this.state.authUser.uid,
+                    this.state.fac_college_name
+                  )
+                  .child(`${current_subKey}/students/${snapshot.key}`)
+                  .update({ attendance: "absent" });
+              });
+
+            this.props.firebase
+              .facultySubjects(
+                this.state.authUser.uid,
+                this.state.fac_college_name
+              )
+              .child(`${current_subKey}/random_access`)
+              .update({
+                access_boolean: false,
+                random_number: 0,
+              });
+
+            this.setState({ stuLength: subStuLength });
+
+            this.setState({ randomNumber: randomCode });
+
+            this.setState({
+              facCardInfoObj: { current_facultySub_key: current_subKey },
+            });
+
+            this.setState({ showAlertAccessCode: true });
+          }
+        }
+      });
+  };
+
+  onDeleteSubjectClick = (current_subKey, current_subName) => {
+    if (this.state.classCardMainSideStrapsDeleteToggle) {
+      this.setState({
+        facCardInfoObj: {
+          current_facultySub_key: current_subKey,
+          subject: current_subName,
+        },
+      });
+      this.setState({ showAlertDelete: true });
+    }
+  };
+
+  onAddStudentsClick = (current_subKey, current_subData) => {
+    this.setState({ studentList: [], isSpinnerHide: false });
+
+    this.setState({
+      addBlur: !this.state.addBlur,
+      addNavBlur: !this.state.addNavBlur,
+      addStudents: true,
+    });
+
+    this.setState({
+      currentSubName: {
+        sub_name: current_subData.subject,
+        sub_room: current_subData.room,
+      },
+    });
+
+    var studentListTotalNo;
+
+    var studentListInvalidFeildNo = 0;
+
+    var studentList = [];
+
+    this.props.firebase
+      .studentList(this.state.fac_college_name)
+      .orderByChild("enrolment_no")
+      .on("child_added", (snapshot) => {
+        var stu_info = snapshot.val();
+        if (
+          stu_info.department === current_subData.department &&
+          stu_info.division === current_subData.division &&
+          stu_info.semester === current_subData.semester &&
+          stu_info.shift === current_subData.shift
+        ) {
+          var stu_uid = snapshot.key;
+
+          this.props.firebase
+            .userAuthorization(stu_uid)
+            .once("value", (snapshot) => {
+              if (snapshot.val().emailVerified) {
+                this.props.firebase
+                  .studentLengthAttendance(
+                    this.state.fac_college_name,
+                    this.state.authUser.uid,
+                    current_subKey,
+                    stu_uid
+                  )
+                  .once("value", (snapshot) => {
+                    const addedStu = snapshot.val();
+
+                    if (addedStu) {
+                      studentList.push({
+                        name: stu_info.name,
+                        enrolment_no: stu_info.enrolment_no,
+                        uid: stu_uid,
+                        added: true,
+                      });
+                      this.setState({
+                        isSpinnerHide: true,
+                        studentList: studentList,
+                      });
+                    } else {
+                      studentList.push({
+                        name: stu_info.name,
+                        enrolment_no: stu_info.enrolment_no,
+                        uid: stu_uid,
+                        added: false,
+                      });
+                      this.setState({
+                        isSpinnerHide: true,
+                        studentList: studentList,
+                      });
+                    }
+                  });
+              }
+            });
+        } else {
+          this.props.firebase
+            .studentList(this.state.fac_college_name)
+            .once("value", (snapshot) => {
+              studentListTotalNo = snapshot.numChildren();
+            });
+
+          studentListInvalidFeildNo = studentListInvalidFeildNo + 1;
+          if (studentListInvalidFeildNo === studentListTotalNo) {
+            this.setState({ isSpinnerHide: true, studentList: null });
+          }
+        }
+      });
+
+    this.onStudentAddClick = (
+      student_uid,
+      student_enrolment_no,
+      student_name
+    ) => {
+      let stuAddedIndex;
+      this.state.studentList.map((student) => {
+        if (student.uid === student_uid) {
+          return (stuAddedIndex = this.state.studentList.indexOf(student));
+        } else {
+          return null;
+        }
+      });
+
+      let studentList = [...this.state.studentList];
+      let addedStudent = {
+        ...studentList[stuAddedIndex],
+        added: true,
+      };
+      studentList[stuAddedIndex] = addedStudent;
+      this.setState({ studentList });
+
+      this.props.firebase
+        .facultySubjects(this.state.authUser.uid, this.state.fac_college_name)
+        .child(`${current_subKey}/students/${student_uid}`)
+        .set({
+          stu_enrolno: student_enrolment_no,
+          stu_name: student_name,
+          attendance: "absent",
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    this.onStudentRemoveClick = (student_uid) => {
+      let stuRemovedIndex;
+      this.state.studentList.map((student) => {
+        if (student.uid === student_uid) {
+          return (stuRemovedIndex = this.state.studentList.indexOf(student));
+        } else {
+          return null;
+        }
+      });
+
+      let studentList = [...this.state.studentList];
+      let removedStudent = {
+        ...studentList[stuRemovedIndex],
+        added: false,
+      };
+      studentList[stuRemovedIndex] = removedStudent;
+      this.setState({ studentList });
+
+      this.props.firebase
+        .facultySubjects(this.state.authUser.uid, this.state.fac_college_name)
+        .child(`${current_subKey}/students/${student_uid}`)
+        .remove()
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    this.onAddAllStudentsClick = () => {
+      this.modifyStudentListArray(true);
+
+      this.state.studentList.map((student) => {
+        return this.props.firebase
+          .facultySubjects(this.state.authUser.uid, this.state.fac_college_name)
+          .child(`${current_subKey}/students/${student.uid}`)
+          .set({
+            stu_enrolno: student.enrolment_no,
+            stu_name: student.name,
+            attendance: "absent",
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    };
+
+    this.onRemoveAllStudentsClick = () => {
+      this.modifyStudentListArray(false);
+
+      this.props.firebase
+        .facultySubjects(this.state.authUser.uid, this.state.fac_college_name)
+        .child(`${current_subKey}/students`)
+        .remove()
+        .catch((error) => {
+          console.log(error);
+        });
+    };
+
+    this.modifyStudentListArray = (changed_state) => {
+      let index = 0;
+      let studentList;
+      let modifiedStudent;
+
+      studentList = [...this.state.studentList];
+
+      while (index < this.state.studentList.length) {
+        modifiedStudent = {
+          ...studentList[index],
+          added: changed_state,
+        };
+
+        studentList[index] = modifiedStudent;
+
+        index++;
+      }
+
+      this.setState({ studentList });
+    };
+  };
+
+  onClickAddStudentsCardStudentInfo = (student_uid) => {
+    this.addStudentsCardStudentInfoEnNo[student_uid].classList.toggle(
+      "addStudentsCardStudentInfoEnNoHide"
+    );
+    this.addStudentsCardStudentInfoName[student_uid].classList.toggle(
+      "addStudentsCardStudentInfoName"
+    );
   };
 
   render() {
@@ -1440,145 +1003,715 @@ class ClassroomSection extends Component {
       shift,
       alt_enrolment_no,
     } = this.state;
+
     return (
-      <div className="classRoomSectionMain">
-        {this.state.authUser.role === "Faculty" && (
-          <div>
+      <div className={"classRoomSectionMain"}>
+        <IonAlert
+          isOpen={this.state.showAlertAccessCode}
+          onDidDismiss={() => this.setState({ showAlertAccessCode: false })}
+          header={this.state.authUser.role === "Student" ? "Just do it!" : null}
+          message={
+            this.state.authUser.role === "Faculty"
+              ? "Please make sure that you do not close your application untill you're done taking everyone's attendance, otherwise you'll lose all of your records."
+              : null
+          }
+          inputs={[
+            {
+              name: `AccessCode`,
+              type: `number`,
+              placeholder:
+                this.state.authUser.role === "Faculty"
+                  ? `Enter your Access Code`
+                  : `Enter Access Code`,
+            },
+          ]}
+          buttons={[
+            {
+              text: "Cancel",
+              role: "cancel",
+              cssClass: "secondary",
+            },
+            {
+              text: "Next",
+              handler: (data) => {
+                if (
+                  this.state.authUser.role === "Faculty" &&
+                  data.AccessCode === this.state.fac_access_code
+                ) {
+                  this.setState({ StudentAttendanceCheckToggle: true });
+
+                  if (this.state.StudentAttendanceCheckToggle) {
+                    this.currentTime();
+
+                    const { facCardInfoObj } = this.state;
+
+                    this.props.firebase
+                      .studentLength(
+                        this.state.fac_college_name,
+                        this.state.facAuthID,
+                        facCardInfoObj.current_facultySub_key
+                      )
+                      .orderByKey()
+                      .on("value", (snapshot) => {
+                        if (this._isMounted) {
+                          let liveSubStuLength = 0;
+                          var subStudents = snapshot.val();
+                          for (var substu in subStudents) {
+                            if (subStudents[substu].attendance === "present") {
+                              liveSubStuLength = liveSubStuLength + 1;
+                            }
+                          }
+                          this.setState({
+                            liveSubStuLength: liveSubStuLength,
+                          });
+                        }
+                      });
+
+                    this.props.firebase
+                      .studentLength(
+                        this.state.fac_college_name,
+                        this.state.facAuthID,
+                        facCardInfoObj.current_facultySub_key
+                      )
+                      .orderByChild("stu_enrolno")
+                      .on("child_added", (snapshot) => {
+                        if (this._isMounted) {
+                          var subStuKey = snapshot.key;
+                          var subStuInfo = snapshot.val();
+                          var studsCardEnrolNo = subStuInfo.stu_enrolno;
+                          var studsCardName = subStuInfo.stu_name;
+                          var StudentAttendanceCard = document.createElement(
+                            "div"
+                          );
+                          var StudentAttendanceCardInfo = document.createElement(
+                            "div"
+                          );
+                          var StudentAttendanceCardInfoEnrolNo = document.createElement(
+                            "div"
+                          );
+                          var StudentAttendanceCardInfoName = document.createElement(
+                            "div"
+                          );
+                          var StudentAttendanceCardBtn = document.createElement(
+                            "div"
+                          );
+
+                          var StudentAttendanceCardBtnIndicator = document.createElement(
+                            "div"
+                          );
+
+                          var StudentAttendanceCardBtnAddContainer = document.createElement(
+                            "div"
+                          );
+                          var StudentAttendanceCardBtnCancelContainer = document.createElement(
+                            "div"
+                          );
+
+                          const StudentAttendanceCardBtnCancel = ReactDOMServer.renderToStaticMarkup(
+                            <FontAwesomeIcon
+                              icon="minus"
+                              style={{
+                                fontSize: `12px`,
+                              }}
+                            />
+                          );
+
+                          const StudentAttendanceCardBtnAdd = ReactDOMServer.renderToStaticMarkup(
+                            <FontAwesomeIcon
+                              icon="plus"
+                              style={{
+                                fontSize: `12px`,
+                              }}
+                            />
+                          );
+
+                          StudentAttendanceCard.className =
+                            "StudentAttendanceCard";
+                          StudentAttendanceCardInfo.className =
+                            "StudentAttendanceCardInfo";
+                          StudentAttendanceCardInfoEnrolNo.className =
+                            "StudentAttendanceCardInfoEnrolNo";
+                          StudentAttendanceCardInfoName.className =
+                            "StudentAttendanceCardInfoNameHide";
+                          StudentAttendanceCardBtn.className =
+                            "StudentAttendanceCardBtn";
+                          StudentAttendanceCardBtnIndicator.className =
+                            "StudentAttendanceCardBtnIndicator";
+                          StudentAttendanceCardBtnAddContainer.className =
+                            "StudentAttendanceCardBtnAddCancel";
+                          StudentAttendanceCardBtnCancelContainer.className =
+                            "StudentAttendanceCardBtnAddCancel";
+
+                          StudentAttendanceCard.appendChild(
+                            StudentAttendanceCardInfo
+                          );
+                          StudentAttendanceCard.appendChild(
+                            StudentAttendanceCardBtn
+                          );
+
+                          StudentAttendanceCardInfo.appendChild(
+                            StudentAttendanceCardInfoEnrolNo
+                          );
+                          StudentAttendanceCardInfo.appendChild(
+                            StudentAttendanceCardInfoName
+                          );
+
+                          StudentAttendanceCardBtn.appendChild(
+                            StudentAttendanceCardBtnIndicator
+                          );
+
+                          StudentAttendanceCardInfo.addEventListener(
+                            "click",
+                            () => {
+                              StudentAttendanceCardInfoEnrolNo.classList.toggle(
+                                "StudentAttendanceCardInfoEnrolNoHide"
+                              );
+                              StudentAttendanceCardInfoName.classList.toggle(
+                                "StudentAttendanceCardInfoName"
+                              );
+                            }
+                          );
+
+                          StudentAttendanceCardInfoEnrolNo.append(
+                            studsCardEnrolNo
+                          );
+                          StudentAttendanceCardInfoName.append(studsCardName);
+
+                          StudentAttendanceCardBtnIndicator.className =
+                            "StudentAttendanceCardBtnIndicator";
+                          StudentAttendanceCardBtnAddContainer.innerHTML = StudentAttendanceCardBtnAdd;
+                          StudentAttendanceCardBtn.appendChild(
+                            StudentAttendanceCardBtnAddContainer
+                          );
+
+                          StudentAttendanceCardBtnAddContainer.addEventListener(
+                            "click",
+                            () => {
+                              this.props.firebase
+                                .studentLengthAttendance(
+                                  this.state.fac_college_name,
+                                  this.state.facAuthID,
+                                  facCardInfoObj.current_facultySub_key,
+                                  subStuKey
+                                )
+                                .update({
+                                  attendance: "present",
+                                })
+                                .catch((error) => {
+                                  console.log(error);
+                                });
+                            }
+                          );
+                          StudentAttendanceCardBtnCancelContainer.addEventListener(
+                            "click",
+                            () => {
+                              this.props.firebase
+                                .studentLengthAttendance(
+                                  this.state.fac_college_name,
+                                  this.state.facAuthID,
+                                  facCardInfoObj.current_facultySub_key,
+                                  subStuKey
+                                )
+                                .update({
+                                  attendance: "absent",
+                                })
+                                .catch((error) => {
+                                  console.log(error);
+                                });
+                            }
+                          );
+
+                          this.props.firebase
+                            .studentLengthAttendance(
+                              this.state.fac_college_name,
+                              this.state.facAuthID,
+                              facCardInfoObj.current_facultySub_key,
+                              subStuKey
+                            )
+                            .on("child_changed", (snapshot) => {
+                              if (this._isMounted) {
+                                if (snapshot.val() === "present") {
+                                  StudentAttendanceCardBtnIndicator.className =
+                                    "StudentAttendanceCardBtnIndicatorOn";
+
+                                  StudentAttendanceCardBtnCancelContainer.innerHTML = StudentAttendanceCardBtnCancel;
+                                  try {
+                                    StudentAttendanceCardBtn.replaceChild(
+                                      StudentAttendanceCardBtnCancelContainer,
+                                      StudentAttendanceCardBtnAddContainer
+                                    );
+                                  } catch (error) {
+                                    console.log(error);
+                                  }
+                                } else if (snapshot.val() === "absent") {
+                                  StudentAttendanceCardBtnIndicator.className =
+                                    "StudentAttendanceCardBtnIndicator";
+
+                                  StudentAttendanceCardBtnAddContainer.innerHTML = StudentAttendanceCardBtnAdd;
+
+                                  try {
+                                    StudentAttendanceCardBtn.replaceChild(
+                                      StudentAttendanceCardBtnAddContainer,
+                                      StudentAttendanceCardBtnCancelContainer
+                                    );
+                                  } catch (error) {
+                                    console.log(error);
+                                  }
+                                }
+                              }
+                            });
+
+                          this.StudentAttendanceCardMain.current.insertBefore(
+                            StudentAttendanceCard,
+                            this.StudentAttendanceCardLast.current
+                          );
+                        }
+                      });
+
+                    this.props.firebase
+                      .facultySubjects(
+                        this.state.facAuthID,
+                        this.state.fac_college_name
+                      )
+                      .child(facCardInfoObj.current_facultySub_key)
+                      .update({
+                        random_access: {
+                          access_boolean: true,
+                          random_number: this.state.randomNumber,
+                        },
+                      })
+                      .catch((error) => {
+                        console.log(error);
+                      });
+                  }
+                } else if (this.state.authUser.role === "Student") {
+                  const { stuCardInfoObj } = this.state;
+
+                  this.props.firebase
+                    .facultySubjects(
+                      stuCardInfoObj.FacKey,
+                      this.state.fac_college_name
+                    )
+                    .child(`${stuCardInfoObj.SubFacKey}/random_access`)
+                    .once("value", (snapshot) => {
+                      if (this._isMounted) {
+                        const fetchrandomno = snapshot.val();
+                        const stufetchrandomno = data.AccessCode;
+
+                        if (
+                          parseInt(stufetchrandomno) ===
+                            fetchrandomno.random_number &&
+                          fetchrandomno.access_boolean === true
+                        ) {
+                          this.props.firebase
+                            .studentLengthAttendance(
+                              this.state.fac_college_name,
+                              stuCardInfoObj.FacKey,
+                              stuCardInfoObj.SubFacKey,
+                              this.state.stu_uid
+                            )
+                            .once("value", (snapshot) => {
+                              var subStudents = snapshot.val();
+                              this.setState({
+                                StudentAttendanceCheckAgain:
+                                  subStudents.attendance,
+                              });
+
+                              if (
+                                this.state.StudentAttendanceCheckAgain ===
+                                "absent"
+                              ) {
+                                this.setState({
+                                  scanningCardToggle: true,
+                                  addBlur: true,
+                                  /*To blur the whole background */
+                                });
+                              } else if (
+                                this.state.StudentAttendanceCheckAgain ===
+                                "present"
+                              ) {
+                                this.setState({ showAlertWarning: true });
+                              } else {
+                                this.setState({ showAlertWrong: false });
+                              }
+                            });
+                        } else {
+                          this.setState({
+                            showAlertAccessCode: false,
+                            showAlertWrong: true,
+                          });
+                        }
+                      }
+                    });
+                } else {
+                  this.setState({
+                    showAlertAccessCode: false,
+                    showAlertWrong: true,
+                  });
+                }
+              },
+            },
+          ]}
+        />
+        <IonAlert
+          isOpen={this.state.showAlertExit}
+          onDidDismiss={() => this.setState({ showAlertExit: false })}
+          header={"Confirmation"}
+          message={
+            this.state.authUser.role === "Student"
+              ? "Are you sure you want to leave the attendace room?"
+              : "Are you sure you want to exit? You won't be able to record any students' attendance in your database."
+          }
+          buttons={[
+            {
+              text: "Cancel",
+              role: "cancel",
+              cssClass: "secondary",
+            },
+            {
+              text: "Okay",
+              handler: () => {
+                if (this.state.authUser.role === "Faculty") {
+                  const { facCardInfoObj } = this.state;
+                  this.props.firebase
+                    .studentLength(
+                      this.state.fac_college_name,
+                      this.state.facAuthID,
+                      facCardInfoObj.current_facultySub_key
+                    )
+                    .orderByKey()
+                    .on("child_added", (snapshot) => {
+                      var subStuKey = snapshot.key;
+
+                      this.props.firebase
+                        .facultySubjects(
+                          this.state.authUser.uid,
+                          this.state.fac_college_name
+                        )
+                        .child(
+                          `${facCardInfoObj.current_facultySub_key}/students/${subStuKey}`
+                        )
+                        .update({ attendance: "absent" });
+                    });
+
+                  this.props.firebase
+                    .facultySubjects(
+                      this.state.facAuthID,
+                      this.state.fac_college_name
+                    )
+                    .child(facCardInfoObj.current_facultySub_key)
+                    .update({
+                      random_access: {
+                        access_boolean: false,
+                        random_number: 0,
+                      },
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+                }
+                window.location.reload(true);
+              },
+            },
+          ]}
+        />
+        <IonAlert
+          isOpen={this.state.showAlertAddDb}
+          onDidDismiss={() => this.setState({ showAlertAddDb: false })}
+          header={"Confirmation"}
+          message={
+            this.state.authUser.role === "Faculty"
+              ? "Are you sure? You won't be able to record other students' attendance in your database once you go ahead."
+              : null
+          }
+          buttons={[
+            {
+              text: "Cancel",
+              role: "cancel",
+              cssClass: "secondary",
+            },
+            {
+              text: "Okay",
+              handler: () => {
+                if (this.state.authUser.role === "Faculty") {
+                  const { facCardInfoObj } = this.state;
+
+                  this.props.firebase
+                    .studentLength(
+                      this.state.fac_college_name,
+                      this.state.facAuthID,
+                      facCardInfoObj.current_facultySub_key
+                    )
+                    .on("child_added", (snapshot) => {
+                      var subStuKey = snapshot.key;
+                      var stuAttendance = snapshot.val().attendance;
+                      var stuEnNo = snapshot.val().stu_enrolno;
+                      var stuName = snapshot.val().stu_name;
+
+                      this.props.firebase
+                        .facultySubjects(
+                          this.state.facAuthID,
+                          this.state.fac_college_name
+                        )
+                        .child(
+                          `${facCardInfoObj.current_facultySub_key}/attendees/${this.state.dateFirebase}/${this.state.randomNumber}/${subStuKey}`
+                        )
+                        .set({
+                          stuAttendance,
+                          stuEnNo,
+                          stuName,
+                        })
+                        .then(() => {
+                          this.props.firebase
+                            .facultySubjects(
+                              this.state.authUser.uid,
+                              this.state.fac_college_name
+                            )
+                            .child(
+                              `${facCardInfoObj.current_facultySub_key}/students/${subStuKey}`
+                            )
+                            .update({ attendance: "absent" });
+
+                          window.location.reload(true);
+                        });
+                    });
+
+                  this.props.firebase
+                    .facultySubjects(
+                      this.state.facAuthID,
+                      this.state.fac_college_name
+                    )
+                    .child(facCardInfoObj.current_facultySub_key)
+                    .update({
+                      random_access: {
+                        access_boolean: false,
+                        random_number: 0,
+                      },
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                    });
+                }
+              },
+            },
+          ]}
+        />
+
+        <IonAlert
+          isOpen={this.state.showAlertWrong}
+          onDidDismiss={() => this.setState({ showAlertWrong: false })}
+          header={"Error"}
+          message={"Something is Wrong! Try Again."}
+          buttons={[
+            {
+              text: "Okay",
+            },
+          ]}
+        />
+
+        <IonAlert
+          isOpen={this.state.showAlertWarning}
+          onDidDismiss={() => this.setState({ showAlertWarning: false })}
+          header={"WARNING"}
+          message={"You've already submitted your attendance once!"}
+          buttons={[
+            {
+              text: "Okay",
+            },
+          ]}
+        />
+
+        <IonAlert
+          isOpen={this.state.showAlertDelete}
+          onDidDismiss={() => this.setState({ showAlertDelete: false })}
+          header={"Confirmation"}
+          message={
+            "Are you sure you want to remove " +
+            renderToStaticMarkup(<b>{this.state.facCardInfoObj.subject}</b>) +
+            " subject from the database? You'll lose all the records related to it, if you click " +
+            renderToStaticMarkup(<b>Yes.</b>)
+          }
+          buttons={[
+            {
+              text: `Cancel`,
+              role: `cancel`,
+              cssClass: `secondary`,
+            },
+            {
+              text: `Yes`,
+              handler: () => {
+                if (this._isMounted) {
+                  const { facCardInfoObj } = this.state;
+                  this.props.firebase
+                    .facultySubjects(
+                      this.state.facAuthID,
+                      this.state.fac_college_name
+                    )
+                    .child(`${facCardInfoObj.current_facultySub_key}`)
+                    .remove();
+                }
+              },
+            },
+          ]}
+        />
+
+        {this.state.authUser.role === "Faculty" &&
+        !this.state.StudentAttendanceCheckToggle ? (
+          <div className="editBarContainer">
+            {this.state.isToggle && (
+              <div className={"quesCardsMain"}>
+                {this.state.selectionCardToggle ? (
+                  <SelectionCard
+                    queCardSelectionOptionClassPass={
+                      this.queCardSelectionOptionClassMethod
+                    }
+                    queCardSelectionOptionLabPass={
+                      this.queCardSelectionOptionLabMethod
+                    }
+                  />
+                ) : (
+                  <div>
+                    <div
+                      className={
+                        !this.state.isHide ? "quesCardOne" : "quesCardOne hide"
+                      }
+                    >
+                      <p>Select the Dept.</p>
+                      <div className="queCardOneForm">
+                        <select
+                          className="collegeListDropdown"
+                          name="department"
+                          value={department}
+                          onChange={this.onChange}
+                        >
+                          <option>--DEPARTMENT--</option>
+                          {this.state.course_list.map((dept) => {
+                            return <option key={dept}>{dept}</option>;
+                          })}
+                        </select>
+                        <div
+                          className="queCardOnebtn"
+                          onClick={this.nextClickBtn}
+                        >
+                          <FontAwesomeIcon
+                            icon="arrow-right"
+                            className="queCardOnebtnIcon"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={
+                        this.state.isHide && this.state.isHideLast === 0
+                          ? "quesCardTwo"
+                          : "quesCardTwo hide"
+                      }
+                    >
+                      <p>The Subject Name?</p>
+                      <div className="queCardTwoForm">
+                        <input
+                          type="text"
+                          name="subject"
+                          value={subject}
+                          onChange={this.onChange}
+                          className="SubjectNameDropdown"
+                          placeholder="Subject"
+                        />
+
+                        <div
+                          className="queCardTwobtn"
+                          onClick={this.nextClickBtnLast}
+                        >
+                          <FontAwesomeIcon
+                            icon="arrow-right"
+                            className="queCardTwobtnIcon"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className={
+                        this.state.isHideLast === 1
+                          ? "quesCardThreeMain"
+                          : "quesCardThreeMain hide"
+                      }
+                    >
+                      <div className="quesCardThree">
+                        <p>Sem., Div. &amp; Shift?</p>
+                        <div className="queCardThreeForm">
+                          <select
+                            className="SemesterListDropdown"
+                            name="semester"
+                            value={semester}
+                            onChange={this.onChange}
+                          >
+                            <option>SEMESTER--</option>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                          </select>
+                          <select
+                            className="DivisionListDropdown"
+                            name="division"
+                            value={division}
+                            onChange={this.onChange}
+                          >
+                            <option>DIVISION--</option>
+                            <option>A</option>
+                            <option>B</option>
+                            <option>C</option>
+                            <option>D</option>
+                            <option>Not Any</option>
+                          </select>
+                          <select
+                            className="ShiftListDropdown"
+                            name="shift"
+                            value={shift}
+                            onChange={this.onChange}
+                          >
+                            <option>COLLEGE SHIFT--</option>
+                            <option>First Shift</option>
+                            <option>Second Shift</option>
+                            <option>No Shift (Has only one Shift)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="queCardThreebtn"
+                        onClick={this.onSubmit}
+                      >
+                        <FontAwesomeIcon
+                          icon="arrow-right"
+                          className="queCardThreebtnIcon"
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div
               className={
-                !this.state.isToggle
-                  ? "bgBlurCardList"
-                  : "bgBlurCardList unscroll"
-              }
-            ></div>
-            <div
-              className={
-                !this.state.isToggle ? "quesCardsMain" : "quesCardsMain visible"
+                !this.state.addNavBlur ? "EditBarMain" : "EditBarMain blur"
               }
             >
-              <div
-                className={
-                  !this.state.isHide ? "quesCardOne" : "quesCardOne hide"
-                }
-              >
-                <p>Select the Dept.</p>
-                <div className="queCardOneForm">
-                  <select
-                    className="collegeListDropdown"
-                    name="department"
-                    value={department}
-                    onChange={this.onChange}
-                  >
-                    <option>--DEPARTMENT--</option>
-                    {this.state.course_list.map((dept) => {
-                      return <option key={dept}>{dept}</option>;
-                    })}
-                  </select>
-                  <div className="queCardOnebtn" onClick={this.nextClickBtn}>
-                    <FontAwesomeIcon
-                      icon="arrow-right"
-                      className="queCardOnebtnIcon"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div
-                className={
-                  this.state.isHide && this.state.isHideLast === 0
-                    ? "quesCardTwo"
-                    : "quesCardTwo hide"
-                }
-              >
-                <p>The Subject Name?</p>
-                <div className="queCardTwoForm">
-                  <input
-                    type="text"
-                    name="subject"
-                    value={subject}
-                    onChange={this.onChange}
-                    className="SubjectNameDropdown"
-                    placeholder="Subject"
-                  />
+              <div className="EditBarBgLeft"></div>
+              <div className="EditBarBgRight"></div>
 
-                  <div
-                    className="queCardTwobtn"
-                    onClick={this.nextClickBtnLast}
-                  >
-                    <FontAwesomeIcon
-                      icon="arrow-right"
-                      className="queCardTwobtnIcon"
-                    />
-                  </div>
-                </div>
-              </div>
               <div
                 className={
-                  this.state.isHideLast === 1
-                    ? "quesCardThreeMain"
-                    : "quesCardThreeMain hide"
+                  this.state.classCardMainAddStudentsToggle
+                    ? "EditBarBgShapeLeft EditBarBgShapeLeftActive"
+                    : "EditBarBgShapeLeft"
                 }
-              >
-                <div className="quesCardThree">
-                  <p>Sem., Div. &amp; Shift?</p>
-                  <div className="queCardThreeForm">
-                    <select
-                      className="SemesterListDropdown"
-                      name="semester"
-                      value={semester}
-                      onChange={this.onChange}
-                    >
-                      <option>SEMESTER--</option>
-                      <option>1</option>
-                      <option>2</option>
-                      <option>3</option>
-                      <option>4</option>
-                      <option>5</option>
-                      <option>6</option>
-                      <option>7</option>
-                      <option>8</option>
-                    </select>
-                    <select
-                      className="DivisionListDropdown"
-                      name="division"
-                      value={division}
-                      onChange={this.onChange}
-                    >
-                      <option>DIVISION--</option>
-                      <option>A</option>
-                      <option>B</option>
-                      <option>C</option>
-                      <option>D</option>
-                      <option>Not Any</option>
-                    </select>
-                    <select
-                      className="ShiftListDropdown"
-                      name="shift"
-                      value={shift}
-                      onChange={this.onChange}
-                    >
-                      <option>COLLEGE SHIFT--</option>
-                      <option>First Shift</option>
-                      <option>Second Shift</option>
-                      <option>No Shift (Has only one Shift)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="queCardThreebtn"
-                  onClick={this.onSubmit}
-                >
-                  <FontAwesomeIcon
-                    icon="arrow-right"
-                    className="queCardThreebtnIcon"
-                  />
-                </button>
-              </div>
-            </div>
-            <div className="EditBarMain">
-              <div
-                className="EditBarBgShapeLeft"
                 onClick={this.onEditBarEditBtnIcon}
               >
                 <FontAwesomeIcon
@@ -1628,109 +1761,71 @@ class ClassroomSection extends Component {
               </div>
             </div>
           </div>
-        )}
+        ) : null}
 
-        <div className="classListSection">
-          <div
-            className={
-              !this.state.isToggle ? "classListNavBar" : "classListNavBar blur"
-            }
-          >
-            <div className="classListSectionhamburgerNav">
-              <div
-                onClick={this.hamburgerToggle}
-                className={
-                  !this.state.isToggleHamburger
-                    ? "classListHamburger"
-                    : "classListHamburger classListHamburgerOpen"
-                }
-              >
-                <span className="classListHamburgerLineOne"></span>
-                <span className="classListHamburgerLineTwo"></span>
-                <span className="classListHamburgerLineThree"></span>
-              </div>
-              <div
-                className={
-                  !this.state.isToggleHamburger
-                    ? "classListNavBarSlider"
-                    : "classListNavBarSlider classListNavBarSliderSlide"
-                }
-              >
-                <div
-                  onClick={this.hamburgerToggle}
-                  className={
-                    !this.state.isToggleHamburger
-                      ? "classListHamburgerClose"
-                      : "classListHamburgerClose classListHamburgerOpen"
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon="plus"
-                    style={{
-                      transform: `rotate(45deg)`,
-                      fontSize: `20px`,
-                      color: `#8d8d8d`,
-                    }}
-                  />
-                </div>
-                <div className="classListNavBarBanner">
-                  <div className="classListNavBarBannerImg">
-                    <img src={FacultyImg} alt="classListNavBarBannerImg" />
-                  </div>
-                  <div className="classListNavBarBannerHeader">
-                    <p>{this.state.profile_name}</p>
-                  </div>
-                </div>
-                <div className="classListNavBarNavList">
-                  <ul>
-                    <Link to={ROUTES.HOME} style={{ textDecoration: `none` }}>
-                      <li>Classroom</li>
-                    </Link>
-                    <Link
-                      className="classListNavBarNavListLinkProfile"
-                      to={ROUTES.PROFILE}
-                      style={{ textDecoration: `none` }}
-                    >
-                      <li>Profile</li>
-                    </Link>
-                    {this.state.authUser.role === "Faculty" && (
-                      <li onClick={this.onClickRecordsLi}>Records</li>
-                    )}
-                    {this.state.authUser.role === "Student" && (
-                      <li onClick={this.onIDCardClick}>ID Card</li>
-                    )}
-                    <li onClick={this.onFeedbackClick}>Feedback</li>
-                    <li onClick={this.props.firebase.doSignOut}>Log Out</li>
-                  </ul>
-                </div>
-              </div>
+        {!this.state.StudentAttendanceCheckToggle ? (
+          <div className="classListSection">
+            <div
+              className={
+                !this.state.addBlur ? "classListNavBar" : "classListNavBar blur"
+              }
+            >
+              <Menu
+                unClickable={this.state.unClickable}
+                hamburgerToggle={this.hamburgerToggle}
+                isToggleHamburger={this.state.isToggleHamburger}
+                name={`Classroom`}
+                blur={this.state.addBlur}
+              />
+
+              <p className="classListNavHeader">
+                <span style={{ color: `#4885ed` }}>C</span>
+                <span style={{ color: `#db3236` }}>l</span>
+                <span style={{ color: `#f4c20d` }}>a</span>
+                <span style={{ color: `#4885ed` }}>s</span>
+                <span style={{ color: `#3cba54` }}>s</span>
+                <span style={{ color: `#db3236` }}>r</span>
+                <span style={{ color: `#f4c20d` }}>o</span>
+                <span style={{ color: `#4885ed` }}>o</span>
+                <span style={{ color: `#3cba54` }}>m</span>
+              </p>
             </div>
-            <p className="classListNavHeader">
-              <span style={{ color: `#4885ed` }}>C</span>
-              <span style={{ color: `#db3236` }}>l</span>
-              <span style={{ color: `#f4c20d` }}>a</span>
-              <span style={{ color: `#4885ed` }}>s</span>
-              <span style={{ color: `#3cba54` }}>s</span>
-              <span style={{ color: `#db3236` }}>r</span>
-              <span style={{ color: `#f4c20d` }}>o</span>
-              <span style={{ color: `#4885ed` }}>o</span>
-              <span style={{ color: `#3cba54` }}>m</span>
-            </p>
+
+            <SubjectList
+              blur={this.state.addBlur}
+              onSubjectClick={(current_subKey, current_facKey) =>
+                this.onSubjectClick(current_subKey, current_facKey)
+              }
+              unclickableToggle={(toggleBoolean) =>
+                this.unclickableToggle(toggleBoolean)
+              }
+              wantSideStrapsToBeVisible={
+                this.state.authUser.role === "Faculty" ? true : false
+              }
+              openDeleteSubject={this.state.classCardMainSideStrapsDeleteToggle}
+              openAddStudents={this.state.classCardMainAddStudentsToggle}
+              onRandomCodeNextClick={(
+                current_subKey,
+                current_facKey,
+                randomCode,
+                current_subData
+              ) =>
+                this.onRandomCodeNextClick(
+                  current_subKey,
+                  current_facKey,
+                  randomCode,
+                  current_subData
+                )
+              }
+              onDeleteSubjectClick={(current_subKey, current_subName) =>
+                this.onDeleteSubjectClick(current_subKey, current_subName)
+              }
+              onAddStudentsClick={(current_subKey, current_subData) =>
+                this.onAddStudentsClick(current_subKey, current_subData)
+              }
+            />
           </div>
-          <div
-            ref={this.classCardMainFacStuSection}
-            className={
-              !this.state.isToggle
-                ? "classCardMainFacStuSection"
-                : "classCardMainFacStuSection blur"
-            }
-            style={
-              this.state.authUser.role === "Faculty"
-                ? { paddingBottom: `120px` }
-                : { paddingBottom: `30px` }
-            }
-          ></div>
-        </div>
+        ) : null}
 
         {this.state.scanningCardToggle && (
           <div className="barCodeScannerMain">
@@ -1795,7 +1890,13 @@ class ClassroomSection extends Component {
                     </div>
                   </div>
 
-                  <Result result={this.state.resultBarcode} />
+                  <Result
+                    result={
+                      this.state.resultBarcode.length === 12
+                        ? this.state.resultBarcode
+                        : "Error Found!"
+                    }
+                  />
                 </div>
               )
             ) : (
@@ -1819,22 +1920,164 @@ class ClassroomSection extends Component {
           </div>
         )}
 
+        {/*Add Students Lab */}
+        {this.state.addStudents ? (
+          <div className={"addStudentsMain"}>
+            <div className="editStudentsSubjectName">
+              {this.state.currentSubName.sub_name}
+              {this.state.currentSubName.sub_room === "lab" && roomLabTag}
+            </div>
+            <div className="addStudents">
+              {!this.state.isSpinnerHide && <Spinner size="32px" />}
+              {this.state.studentList !== null ? (
+                this.state.studentList.map((student) => {
+                  return (
+                    <div
+                      className="addStudentsCard"
+                      key={student.enrolment_no + student.name}
+                    >
+                      <div
+                        className="addStudentsCardStudentInfo"
+                        onClick={() =>
+                          this.onClickAddStudentsCardStudentInfo(student.uid)
+                        }
+                      >
+                        <div
+                          className="addStudentsCardStudentInfoEnNo"
+                          ref={(ref) =>
+                            (this.addStudentsCardStudentInfoEnNo[
+                              student.uid
+                            ] = ref)
+                          }
+                        >
+                          {student.enrolment_no}
+                        </div>
+                        <div
+                          className="addStudentsCardStudentInfoNameHide"
+                          ref={(ref) =>
+                            (this.addStudentsCardStudentInfoName[
+                              student.uid
+                            ] = ref)
+                          }
+                        >
+                          {student.name}
+                        </div>
+                      </div>
+                      <div>
+                        {!student.added && (
+                          <div
+                            style={{
+                              cursor: `default`,
+                              width: `18px`,
+                              height: `18px`,
+                              borderRadius: `50%`,
+                              border: `2px solid #db3236`,
+                              display: `flex`,
+                              justifyContent: `center`,
+                              alignItems: `center`,
+                              marginRight: `24px`,
+                              marginLeft: `14px`,
+                            }}
+                            onClick={() =>
+                              this.onStudentAddClick(
+                                student.uid,
+                                student.enrolment_no,
+                                student.name
+                              )
+                            }
+                          >
+                            <FontAwesomeIcon
+                              icon="plus"
+                              style={{
+                                color: `#db3236`,
+                                fontSize: `12px`,
+                              }}
+                            />
+                          </div>
+                        )}
+                        {student.added && (
+                          <div
+                            style={{
+                              cursor: `default`,
+                              width: `18px`,
+                              height: `18px`,
+                              borderRadius: `50%`,
+                              border: `2px solid #3cba54`,
+                              display: `flex`,
+                              justifyContent: `center`,
+                              alignItems: `center`,
+                              marginRight: `24px`,
+                              marginLeft: `14px`,
+                            }}
+                            onClick={() =>
+                              this.onStudentRemoveClick(student.uid)
+                            }
+                          >
+                            <FontAwesomeIcon
+                              icon="minus"
+                              style={{
+                                color: `#3cba54`,
+                                fontSize: `12px`,
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div
+                  className="addStudentsCard"
+                  style={{ justifyContent: `center`, color: `#8d8d8d` }}
+                >
+                  No Students Found!
+                </div>
+              )}
+            </div>
+
+            <div
+              className="addStudentsBtn"
+              style={
+                !this.state.isSpinnerHide ? { pointerEvents: `none` } : null
+              }
+            >
+              <div
+                className="addAllStudentsBtn"
+                onClick={this.onAddAllStudentsClick}
+                // ref={this.addAllStudents}
+              >
+                Add all
+              </div>
+              <div
+                className="addStudentsCloseBtn"
+                onClick={this.addStudentsClose}
+              >
+                <FontAwesomeIcon
+                  icon="plus"
+                  style={{ transform: `rotate(45deg)` }}
+                />
+              </div>
+              <div
+                className="addStudentsNextBtn"
+                onClick={this.addStudentsNext}
+              >
+                <FontAwesomeIcon icon="arrow-right" />
+              </div>
+              <div
+                className="removeAllStudentsBtn"
+                onClick={this.onRemoveAllStudentsClick}
+                // ref={this.removeAllStudents}
+              >
+                Remove all
+              </div>
+            </div>
+          </div>
+        ) : null}
         {/* Attendees Section */}
 
-        <PDFExport
-          //es6 way to give reference
-          ref={(component) => (this.pdfExportComponent = component)}
-          paperSize="auto"
-          margin={40}
-          fileName={`Attendance Report`}
-        >
-          <div
-            className={
-              this.state.StudentAttendanceCheckToggle
-                ? "AttendeeBaseMain"
-                : "AttendeeBaseMainHide"
-            }
-          >
+        {this.state.StudentAttendanceCheckToggle && (
+          <div className={"AttendeeBaseMain"}>
             <div className="AttendeeBaseMainHeader">
               <div className="AttendeeBaseMainHeaderContent">
                 <p className="AttendeeBaseMainHeaderName">Attendees</p>
@@ -1844,25 +2087,21 @@ class ClassroomSection extends Component {
                 </p>
               </div>
               <div className="circleStudentsCount">
-                <span
-                  // ref={this.LiveSubStudentLength}
-                  className="AttendeeBaseMainStudentCountTotalNo"
-                >
-                  {this.state.liveSubStuLength < 100
+                <span className="AttendeeBaseMainStudentCountTotalNo">
+                  {this.state.liveSubStuLength < 10 && this.state.stuLength > 99
+                    ? `00${this.state.liveSubStuLength}`
+                    : (this.state.liveSubStuLength < 10 &&
+                        this.state.stuLength < 100) ||
+                      (this.state.liveSubStuLength > 10 &&
+                        this.state.stuLength > 99)
                     ? `0${this.state.liveSubStuLength}`
                     : this.state.liveSubStuLength}
-                  {/* {this.state.stuLength < 100
-                  ? this.state.stuLength < 10
-                    ? `00${this.state.stuLength}`
-                    : `0${this.state.stuLength}`
-                  : this.state.stuLength}{" "}
-                /{" "} */}
                 </span>
 
                 <span className="AttendeeBaseMainStudentCountAttendeesNo">
                   {" "}
                   /{" "}
-                  {this.state.stuLength < 100
+                  {this.state.stuLength < 10
                     ? `0${this.state.stuLength}`
                     : this.state.stuLength}
                 </span>
@@ -1881,32 +2120,18 @@ class ClassroomSection extends Component {
                     ref={this.StudentAttendanceCardLast}
                   >
                     <div
-                      ref={this.StudentAttendanceCardPresentList}
-                      onClick={this.PDFExportPresent}
-                      className="AttendeeBaseMainPresentDownloadBtn"
-                      style={{ fontWeight: `800` }}
-                    >
-                      {/* <FontAwesomeIcon icon="download" /> */}P
-                    </div>
-                    <div
-                      ref={this.StudentAttendanceCardAbsentList}
-                      onClick={this.PDFExportAbsent}
-                      className="AttendeeBaseMainAbsentDownloadBtn"
-                      style={{ fontWeight: `800` }}
-                    >
-                      {/* <FontAwesomeIcon icon="download" /> */}A
-                    </div>
-                    <div
                       className="AttendeeBaseMainAddDBBtn"
                       onClick={this.AttendeesDBAddBtn}
                     >
                       <FontAwesomeIcon icon="database" />
+                      <p>Save</p>
                     </div>
                     <div
                       className="AttendeeBaseMainExitBtn"
                       onClick={this.AttendeesExitBtn}
                     >
                       <FontAwesomeIcon icon="sign-out-alt" />
+                      <p>Exit</p>
                     </div>
                   </div>
                 )}
@@ -1925,15 +2150,32 @@ class ClassroomSection extends Component {
               </div>
             </div>
           </div>
-        </PDFExport>
+        )}
       </div>
     );
   }
 }
 
+const roomLabTag = (
+  <sup
+    style={{
+      backgroundColor: `red`,
+      padding: `2px 4px`,
+      borderRadius: `4px`,
+      fontSize: `8px`,
+      color: `#ffffff`,
+      marginLeft: `5px`,
+      fontWeight: `800`,
+    }}
+  >
+    LAB
+  </sup>
+);
+
 const ClassroomSectionMain = compose(
   withRouter,
-  withFirebase
+  withFirebase,
+  withEmailVerification
 )(ClassroomSection);
 
 export default Classroom;

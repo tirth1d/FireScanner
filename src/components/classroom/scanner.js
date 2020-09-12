@@ -6,9 +6,10 @@ class Scanner extends Component {
   componentDidMount() {
     Quagga.init(
       {
-        numOfWorkers: 0,
+        numOfWorkers: 0, // Needs to be 0 when used within node environment
         locate: true,
         inputStream: {
+          name: "Live",
           type: "LiveStream",
           constraints: {
             width: 640,
@@ -40,6 +41,11 @@ class Scanner extends Component {
 
   _onDetected = (result) => {
     this.props.onDetected(result);
+    try {
+      Quagga.stop();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   render() {

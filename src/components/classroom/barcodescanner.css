@@ -23,19 +23,14 @@
   margin: 0;
 }
 
-/* .scannerComponent + .afterResultDetectedDiv {
-  display: none;
-}
-.afterResultDetectedDivShow + .afterResultDetectedDiv {
-  display: block;
-} */
-
 .barCodeScannerMain {
   height: 100%;
   width: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 100000;
+  overflow: scroll;
 }
 .barCodeScanner {
   z-index: 100;
@@ -76,7 +71,6 @@
 }
 
 .barcodeFailNextBtn {
-  cursor: pointer;
   width: 40px;
   height: 40px;
   background-color: #db3236;
@@ -88,7 +82,6 @@
   margin-top: 15px;
 }
 .cardScanningHamburgerClose {
-  cursor: pointer;
   position: absolute;
   top: 2%;
   right: 4%;
@@ -168,7 +161,6 @@ video {
 
 .barcodeResultOptionsReScan,
 .barcodeResultOptionsConfirm {
-  cursor: pointer;
   width: 90px;
   height: 90px;
   border-radius: 50%;
@@ -204,7 +196,6 @@ video {
 
 /*Barcode Scanner Alternative*/
 .barCodeScannerAlternative {
-  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;

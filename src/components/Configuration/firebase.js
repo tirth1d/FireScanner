@@ -38,7 +38,10 @@ class Firebase {
 
   doSignInWithGoogle = () => this.auth.signInWithPopup(this.googleProvider);
 
-  doSignOut = () => this.auth.signOut();
+  doSignOut = () =>
+    this.auth.signOut().catch((error) => {
+      console.log(error);
+    });
 
   doPasswordReset = (email) => this.auth.sendPasswordResetEmail(email);
 
@@ -59,25 +62,56 @@ class Firebase {
   onAuthUserListener = (next, fallback) =>
     this.auth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        this.user(authUser.uid)
+        this.userAuthorization(authUser.uid)
           .once("value")
           .then((snapshot) => {
-            const dbUser = snapshot.val();
+            const dbUserAuthorization = snapshot.val();
+
             // default empty role
-            if (!dbUser.role) {
-              dbUser.role = "";
+            if (!dbUserAuthorization.role) {
+              dbUserAuthorization.role = "";
             }
 
-            // merge auth and db user
-            authUser = {
-              uid: authUser.uid,
-              email: authUser.email,
-              emailVerified: authUser.emailVerified,
-              providerData: authUser.providerData,
-              ...dbUser,
-            };
+            if (dbUserAuthorization.role === "Faculty") {
+              this.faculty(dbUserAuthorization.college, authUser.uid).once(
+                "value",
+                (snapshot) => {
+                  const dbUser = snapshot.val();
 
-            next(authUser);
+                  // merge auth and db user
+                  authUser = {
+                    access_code: dbUser.access_code,
+                    name: dbUser.name,
+                    role: dbUserAuthorization.role,
+                    college: dbUserAuthorization.college,
+                    uid: authUser.uid,
+                    email: authUser.email,
+                    emailVerified: authUser.emailVerified,
+                    providerData: authUser.providerData,
+                  };
+                  next(authUser);
+                }
+              );
+            } else if (dbUserAuthorization.role === "Student") {
+              this.student(dbUserAuthorization.college, authUser.uid).once(
+                "value",
+                (snapshot) => {
+                  const dbUser = snapshot.val();
+
+                  // merge auth and db user
+                  authUser = {
+                    ...dbUser,
+                    role: dbUserAuthorization.role,
+                    college: dbUserAuthorization.college,
+                    uid: authUser.uid,
+                    email: authUser.email,
+                    emailVerified: authUser.emailVerified,
+                    providerData: authUser.providerData,
+                  };
+                  next(authUser);
+                }
+              );
+            }
           });
       } else {
         fallback();
@@ -86,7 +120,7 @@ class Firebase {
 
   // *** User API ***
 
-  user = (uid) => this.db.ref(`users/${uid}`);
+  userAuthorization = (uid) => this.db.ref(`userAuthorization/${uid}`);
 
   studentList = (clgName) => this.db.ref(`Students/${clgName}`);
 

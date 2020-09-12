@@ -3,7 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import { compose } from "recompose";
 
 import AuthUserContext from "../../../Session/context";
-import Home from "../../../Home";
+import Classroom from "../../../classroom";
 import TermCheckbox from "../TermsCheckbox";
 
 import { withFirebase } from "../../../Configuration";
@@ -16,11 +16,13 @@ import Banner from "../../FormBanner";
 import StuSignUpBanner from "../../../../images/stud_banner.png";
 import "../../index.css";
 
+import Spinner from "../../../spinner";
+
 const condition = (authUser) => !!authUser;
 
 const SignUpStudentPageCondition = () => (
   <AuthUserContext.Consumer>
-    {(authUser) => (condition(authUser) ? <Home /> : <SignUpStuPage />)}
+    {(authUser) => (condition(authUser) ? <Classroom /> : <SignUpStuPage />)}
   </AuthUserContext.Consumer>
 );
 
@@ -45,6 +47,7 @@ const INITIAL_STATE = {
   fname: "",
   lname: "",
   college: "",
+  collegeWithCode: "",
   enrolno: "",
   department: "",
   semester: "",
@@ -59,9 +62,9 @@ const INITIAL_STATE = {
   college_list: CollegeJSON,
   course_list: [],
 
-  authUserId: "",
-
   termCheckboxToggle: false,
+
+  isToggleSpinner: false,
 };
 
 const ERROR_CODE_ACCOUNT_EXISTS = "auth/email-already-in-use";
@@ -75,31 +78,24 @@ class SignUpFormBase extends Component {
   constructor(props) {
     super(props);
 
+    this._isMounted = false;
+
     this.state = { ...INITIAL_STATE };
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
   }
 
   onChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
-    // console.log(event.target.value);
   };
 
   onChangeCollege = (event) => {
-    this.setState({
-      [event.target.name]: this.state.college_list.find(
-        (college) => `${college.code} - ${college.name}` === event.target.value
-      ).name,
-    });
-
-    // console.log(event.target.value);
-    // console.log(
-    //   this.state.college_list.find(
-    //     (college) => `${college.code} - ${college.name}` === event.target.value
-    //   ).name
-    // );
+    this.setState({ [event.target.name]: event.target.value });
 
     this.setState({
       course_list:
-        event.target.value &&
         event.target.value !== "----[College Code / College Name]----"
           ? this.state.college_list.find(
               (college) =>
@@ -107,6 +103,26 @@ class SignUpFormBase extends Component {
             ).courses
           : [],
     });
+
+    this.setState({ department: "" });
+
+    if (event.target.value !== "----[College Code / College Name]----") {
+      this.setState({
+        college: this.state.college_list.find(
+          (college) =>
+            `${college.code} - ${college.name}` === event.target.value
+        ).name,
+      });
+    } else if (event.target.value === "----[College Code / College Name]----") {
+      this.setState({ college: "" });
+    }
+  };
+
+  onChangeDepartment = (event) => {
+    this.setState({ [event.target.name]: event.target.value });
+    if (event.target.value === "--SELECT--") {
+      this.setState({ department: "" });
+    }
   };
 
   onSubmit = (event) => {
@@ -125,14 +141,7 @@ class SignUpFormBase extends Component {
       role,
     } = this.state;
 
-    // let role = "";
-
-    // if (isStudent) {
-    //   //Usually we don't need isStudent condition as it is always gonna be true bu i'm keeping it fot better understanding purposes.
-    //   role = ROLE.STUDENT;
-    // }
-
-    this.setState({ error: null });
+    this.setState({ error: null, isToggleSpinner: true });
 
     if (
       fname === "" &&
@@ -158,80 +167,87 @@ class SignUpFormBase extends Component {
       this.setState({ error: "Please Select the right Options" });
     } else if (fname === "" || lname === "") {
       this.setState({ error: "Please Enter Your First & Last Name Properly" });
-    } else if (email === "") {
-      this.setState({ error: "Please Enter Your Email Address" });
     } else if (college === "") {
       this.setState({ error: "Please Select Your College" });
+    } else if (department === "") {
+      this.setState({ error: "Please Select Your Department" });
+    } else if (semester === "") {
+      this.setState({ error: "Please Select Your Semester" });
     } else if (division === "") {
       this.setState({ error: "Please Select Your Division" });
     } else if (enrolno === "") {
       this.setState({ error: "Please Enter Your GTU Enrolment No." });
     } else if (enrolno.length !== 12) {
       this.setState({ error: "Incorrect GTU Enrolment No." });
-    } else if (department === "") {
-      this.setState({ error: "Please Enter Your Department" });
+    } else if (email === "") {
+      this.setState({ error: "Please Enter Your Email Address" });
     } else if (shift === "") {
       this.setState({ error: "Please Enter Your College Shift" });
-    } else if (semester === "") {
-      this.setState({ error: "Please Enter Your Semester" });
     } else if (passwordOne !== passwordTwo) {
       this.setState({ error: "Passwords are not matching" });
     } else if (passwordOne === "") {
       this.setState({ error: "Please Enter Password" });
     } else if (!this.state.termCheckboxToggle) {
-      this.setState({ error: "Please Tick the Terms and Conditions" });
+      this.setState({ error: "Please Accept T&C" });
     } else {
-      this.props.firebase
-        .doCreateUserWithEmailAndPassword(email, passwordOne)
-        .then((authUser) => {
-          this.setState({ authUserId: authUser.user.uid });
-          // Create a user in your Firebase realtime database
-          return this.props.firebase.user(authUser.user.uid).set({
-            name: fname + " " + lname,
-            enrolment_no: enrolno,
-            college,
-            department,
-            semester,
-            division,
-            email,
-            shift,
-            role: role,
-          });
-        })
-        .then(() => {
-          // Create a user in your Firebase realtime database
-          return this.props.firebase
-            .student(college, this.state.authUserId)
-            .set({
-              name: fname + " " + lname,
-              enrolment_no: enrolno,
-              college,
-              department,
-              semester,
-              division,
-              email,
-              shift,
-              role: role,
-            });
-        })
-        .then(() => {
-          // console.log("Successfully Signed Up.");
-          this.setState({ ...INITIAL_STATE });
-          // console.log("Initialized newState!!");
-          this.props.history.push(ROUTES.HOME);
-          // console.log("Redirected to Home!!");
-        })
-        .catch((error) => {
-          if (this.state.error == null) {
-            if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
-              error.message = ERROR_MSG_ACCOUNT_EXISTS;
-              this.setState({ error: error.message });
-            } else if (error.code === ERROR_CODE_INVALID_EMAIL) {
-              error.message = ERROR_MSG_INVALID_EMAIL;
-              this.setState({ error: error.message });
+      if (this._isMounted) {
+        this.props.firebase
+          .doCreateUserWithEmailAndPassword(email, passwordOne)
+          .then((authUser) => {
+            if (this._isMounted) {
+              // Create a user in your Firebase realtime database
+              this.props.firebase
+                .userAuthorization(authUser.user.uid)
+                .set({
+                  college,
+                  role: role,
+                  emailVerified: false,
+                })
+                .then(() => {
+                  if (this._isMounted) {
+                    this.props.firebase
+                      .student(college, authUser.user.uid)
+                      .set({
+                        name: fname + " " + lname,
+                        enrolment_no: enrolno,
+                        department,
+                        semester,
+                        division,
+                        email,
+                        shift,
+                      })
+                      .then(() => {
+                        if (this._isMounted) {
+                          // console.log("Successfully Signed Up.");
+                          this.setState({ ...INITIAL_STATE });
+                          // console.log("Initialized newState!!");
+                          this.props.history.push(ROUTES.CLASSROOM);
+                          // console.log("Redirected to Home!!");
+                          // window.location.reload(true);
+                        }
+                      });
+                  }
+                });
+            } else {
+              this.props.firebase.doAccountDelete();
+              this.setState({
+                isToggleSpinner: false,
+                error: "Something went wrong! Try again later.",
+              });
             }
-          }
-        });
+          })
+          .catch((error) => {
+            if (this.state.error == null) {
+              if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+                error.message = ERROR_MSG_ACCOUNT_EXISTS;
+                this.setState({ error: error.message });
+              } else if (error.code === ERROR_CODE_INVALID_EMAIL) {
+                error.message = ERROR_MSG_INVALID_EMAIL;
+                this.setState({ error: error.message });
+              }
+            }
+          });
+      }
     }
 
     event.preventDefault();
@@ -241,11 +257,16 @@ class SignUpFormBase extends Component {
     this.setState({ termCheckboxToggle: !this.state.termCheckboxToggle });
   };
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   render() {
     const {
       fname,
       lname,
       college,
+      collegeWithCode,
       enrolno,
       department,
       semester,
@@ -260,6 +281,10 @@ class SignUpFormBase extends Component {
       course_list,
     } = this.state;
 
+    var splitCollege = college.split(" ");
+    var splitCollegeLimit = college.split(" ", 4);
+    var splitDept = department.split(" ");
+    var splitDeptLimit = college.split(" ", 4);
     return (
       <form
         onSubmit={this.onSubmit}
@@ -302,9 +327,9 @@ class SignUpFormBase extends Component {
           <div className="group dropdown-group">
             <select
               className="Dropdown"
-              value={college}
+              value={collegeWithCode}
               onChange={this.onChangeCollege}
-              name="college"
+              name="collegeWithCode"
             >
               <option>----[College Code / College Name]----</option>
               {college_list.map((e, key) => {
@@ -315,24 +340,44 @@ class SignUpFormBase extends Component {
                 );
               })}
             </select>
-            <label className="dropdown-placeholder">
-              <label>College</label>
+            <label className={"dropdown-placeholder"}>
+              College
+              {college !== "" ? " - " : null}
+              {college !== ""
+                ? splitCollege.length > 4
+                  ? splitCollegeLimit.map((i, key) => {
+                      return <span key={key}>{i[0]}</span>;
+                    })
+                  : splitCollege.map((i, key) => {
+                      return <span key={key}>{i[0]}</span>;
+                    })
+                : null}
+              {college !== "" && splitCollege.length > 4 ? ".." : null}
             </label>
           </div>
           <div className="group dropdown-group">
             <select
               className="Dropdown"
               value={department}
-              onChange={this.onChange}
+              onChange={this.onChangeDepartment}
               name="department"
             >
               <option>--SELECT--</option>
-              {course_list.map((dept) => {
-                return <option key={dept}>{dept}</option>;
+              {course_list.map((dept, key) => {
+                return <option key={key}>{dept}</option>;
               })}
             </select>
 
-            <label className="dropdown-placeholder">Department</label>
+            <label className={"dropdown-placeholder"}>
+              Department
+              {department !== "" ? " - " : null}
+              {department !== ""
+                ? splitDept.length > 4
+                  ? splitDeptLimit.map((i) => i[0])
+                  : splitDept.map((i) => i[0])
+                : null}
+              {department !== "" && splitDept.length > 4 ? ".." : null}
+            </label>
           </div>
         </div>
         <br />
@@ -374,8 +419,11 @@ class SignUpFormBase extends Component {
               <option>Not Any</option>
             </select>
             <label className="dropdown-placeholder">
-              Class Div.
-              {division && division !== "--SELECT--" ? " - " + division : null}
+              {division && division !== "--SELECT--"
+                ? division === "Not Any"
+                  ? "Division - No"
+                  : "Division - " + division
+                : "Class Div."}
             </label>
           </div>
         </div>
@@ -429,9 +477,7 @@ class SignUpFormBase extends Component {
             <label className="dropdown-placeholder">
               Shift
               {shift && shift !== "--SELECT--"
-                ? shift === "No Shift (Has only one Shift)"
-                  ? " - No Shift"
-                  : " - " + shift
+                ? " - " + shift.substr(0, shift.indexOf(" "))
                 : null}
             </label>
           </div>
@@ -479,8 +525,17 @@ class SignUpFormBase extends Component {
         <button type="submit" name="submit" className="SubmitBut">
           Submit
         </button>
+
+        {this.state.isToggleSpinner && error === null ? (
+          <div style={{ marginTop: `10px` }}>
+            <Spinner />
+          </div>
+        ) : null}
+
         <div className="error-text">
-          {error && <p style={{ color: `#ff0000` }}>*{error}*</p>}
+          {error !== null ? (
+            <p style={{ color: `#ff0000` }}>*{error}*</p>
+          ) : null}
         </div>
       </form>
     );
@@ -494,6 +549,7 @@ const SignInLink = () => (
       padding: `0`,
       paddingBottom: `60px`,
       margin: `0`,
+      cursor: `default`,
     }}
   >
     Already have an account?
@@ -504,6 +560,7 @@ const SignInLink = () => (
         color: `#0000ff`,
         fontWeight: `500`,
         paddingLeft: `5px`,
+        cursor: `default`,
       }}
     >
       Sign In

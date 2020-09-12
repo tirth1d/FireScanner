@@ -7,6 +7,11 @@ import * as serviceWorker from "./serviceWorker";
 import App from "./components/App";
 import Firebase, { FirebaseContext } from "./components/Configuration";
 
+import { Plugins } from "@capacitor/core";
+
+const { SplashScreen } = Plugins;
+SplashScreen.hide();
+
 ReactDOM.render(
   <FirebaseContext.Provider value={new Firebase()}>
     <App />

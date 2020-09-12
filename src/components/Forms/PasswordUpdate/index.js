@@ -3,6 +3,7 @@ import "../index.css";
 import { withFirebase } from "../../Configuration";
 import Banner from "../FormBanner";
 import StuSignUpBanner from "../../../images/faculty_banner.png";
+import Spinner from "../../spinner";
 
 const PasswordUpdatePage = () => (
   <div>
@@ -19,40 +20,60 @@ const PasswordUpdatePage = () => (
 const INITIAL_STATE = {
   passwordOne: "",
   passwordTwo: "",
-  error: null,
+  error: "",
+  isSpinnerHide: true,
 };
 
 class PasswordUpdateFormBase extends Component {
   constructor(props) {
     super(props);
 
+    this._isMounted = false;
+
     this.state = { ...INITIAL_STATE };
   }
 
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
   onSubmit = (event) => {
-    const { passwordOne } = this.state;
+    if (this._isMounted) {
+      this.setState({ isSpinnerHide: false, error: "" });
 
-    this.props.firebase
-      .doPasswordUpdate(passwordOne)
-      .then(() => {
-        this.setState({ ...INITIAL_STATE });
-        console.log("Password Updated!!");
-      })
-      .catch((error) => {
-        this.setState({ error });
-      });
+      const { passwordOne, passwordTwo } = this.state;
 
-    event.preventDefault();
+      if (passwordOne === "") {
+        this.setState({ error: "Invalid Password!" });
+      } else if (passwordOne !== passwordTwo) {
+        this.setState({ error: "Passwords are not matching" });
+      } else {
+        if (this._isMounted) {
+          this.props.firebase
+            .doPasswordUpdate(passwordOne)
+            .then(() => {
+              this.setState({ ...INITIAL_STATE });
+              this.setState({ error: "Updated Successfully!" });
+            })
+            .catch((error) => {
+              this.setState({ error: error.message });
+            });
+        }
+      }
+      event.preventDefault();
+    }
   };
 
   onChange = (event) => {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  render() {
-    const { passwordOne, passwordTwo, error } = this.state;
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
-    const isInvalid = passwordOne !== passwordTwo || passwordOne === "";
+  render() {
+    const { passwordOne, passwordTwo, error, isSpinnerHide } = this.state;
 
     return (
       <form onSubmit={this.onSubmit} style={{ paddingBottom: `30px` }}>
@@ -79,16 +100,26 @@ class PasswordUpdateFormBase extends Component {
           <label className="placeholder">Confirm Password</label>
         </div>
         <br />
-        <button
-          disabled={isInvalid}
-          type="submit"
-          name="submit"
-          className="SubmitBut"
-        >
+        <button type="submit" name="submit" className="SubmitBut">
           Reset
         </button>
-
-        {error && <p>{error.message}</p>}
+        {error !== "" ? (
+          <div
+            className="error-text"
+            style={{ marginTop: `-10px`, marginBottom: `-28px` }}
+          >
+            <p
+              style={
+                error === "Updated Successfully!"
+                  ? { color: `green` }
+                  : { color: `#ff0000` }
+              }
+            >
+              {error === "Updated Successfully!" ? error : "*" + error + "*"}
+            </p>
+          </div>
+        ) : null}
+        {error === "" && !isSpinnerHide ? <Spinner /> : null}
       </form>
     );
   }
